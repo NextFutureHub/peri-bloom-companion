@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GradientButton, SoftButton } from "@/components/ui/button-variants";
-import { Plus, Calendar, Trash2 } from "lucide-react";
+import { Plus, Calendar, Trash2, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +35,7 @@ const Symptoms = () => {
     severity: "medium" as "low" | "medium" | "high",
     notes: "",
   });
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const handleAdd = () => {
     if (!formData.name.trim()) {
@@ -57,6 +60,33 @@ const Symptoms = () => {
     toast.success("Симптом удален");
   };
 
+  const exportToPDF = async () => {
+    if (!contentRef.current || symptoms.length === 0) {
+      toast.error("Нет данных для экспорта");
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(contentRef.current, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`symptoms_${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast.success(t("symptoms.pdfExported"));
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast.error("Ошибка экспорта PDF");
+    }
+  };
+
   const severityColors = {
     low: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
     medium: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
@@ -67,12 +97,19 @@ const Symptoms = () => {
     <div className="min-h-screen p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <Card className="shadow-soft">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-6 h-6 text-primary" />
               {t("symptoms.title")}
             </CardTitle>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <div className="flex gap-2">
+              {symptoms.length > 0 && (
+                <SoftButton onClick={exportToPDF} size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  {t("symptoms.exportPDF")}
+                </SoftButton>
+              )}
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <GradientButton size="sm">
                   <Plus className="w-4 h-4 mr-2" />
@@ -127,8 +164,9 @@ const Symptoms = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent ref={contentRef}>
             {symptoms.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <p>{t("symptoms.noSymptoms")}</p>

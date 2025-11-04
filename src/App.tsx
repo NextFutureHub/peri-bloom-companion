@@ -8,6 +8,7 @@ import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import AIChat from "./pages/AIChat";
 import Symptoms from "./pages/Symptoms";
+import IoTMonitor from "./pages/IoTMonitor";
 import Education from "./pages/Education";
 import Settings from "./pages/Settings";
 import Navigation from "./components/Navigation";
@@ -32,6 +33,7 @@ const AppRoutes = () => {
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/ai-chat" element={<ProtectedRoute><AIChat /></ProtectedRoute>} />
           <Route path="/symptoms" element={<ProtectedRoute><Symptoms /></ProtectedRoute>} />
+          <Route path="/iot" element={<ProtectedRoute><IoTMonitor /></ProtectedRoute>} />
           <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
