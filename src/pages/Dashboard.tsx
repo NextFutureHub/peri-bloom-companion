@@ -1,7 +1,7 @@
 import { useApp } from "@/contexts/AppContext";
-import { useTranslation } from "@/hooks/useTranslation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GradientButton } from "@/components/ui/button-variants";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
+import { GradientButton } from "@/shared/ui/atoms/button-variants";
 import { MessageCircle, BookOpen, FileText, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

@@ -1,9 +1,9 @@
 import { useApp } from "@/contexts/AppContext";
-import { useTranslation } from "@/hooks/useTranslation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SoftButton } from "@/components/ui/button-variants";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
+import { Label } from "@/shared/ui/atoms/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/atoms/select";
+import { SoftButton } from "@/shared/ui/atoms/button-variants";
 import { Settings as SettingsIcon, Globe, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";

@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { BookOpen, Lock } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@/shared/ui/atoms/progress";
 
 const Education = () => {
   const modules = [

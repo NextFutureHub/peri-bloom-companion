@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GradientButton, SoftButton } from "@/components/ui/button-variants";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
+import { GradientButton, SoftButton } from "@/shared/ui/atoms/button-variants";
 import { Thermometer, Droplets, Volume2, Wifi, WifiOff, Activity } from "lucide-react";
 import { toast } from "sonner";
 

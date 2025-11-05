@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp, LifeStage } from "@/contexts/AppContext";
-import { useTranslation } from "@/hooks/useTranslation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { GradientButton, SoftButton } from "@/components/ui/button-variants";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
+import { Input } from "@/shared/ui/atoms/input";
+import { Label } from "@/shared/ui/atoms/label";
+import { GradientButton, SoftButton } from "@/shared/ui/atoms/button-variants";
 import { Heart, Baby, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 

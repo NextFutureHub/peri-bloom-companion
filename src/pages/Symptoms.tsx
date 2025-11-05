@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GradientButton, SoftButton } from "@/components/ui/button-variants";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
+import { GradientButton, SoftButton } from "@/shared/ui/atoms/button-variants";
 import { Plus, Calendar, Trash2, Download } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -11,11 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+} from "@/shared/ui/atoms/dialog";
+import { Input } from "@/shared/ui/atoms/input";
+import { Label } from "@/shared/ui/atoms/label";
+import { Textarea } from "@/shared/ui/atoms/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/atoms/select";
 import { toast } from "sonner";
 
 interface Symptom {

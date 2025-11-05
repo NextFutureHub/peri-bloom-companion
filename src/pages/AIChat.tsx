@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { GradientButton } from "@/components/ui/button-variants";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
+import { Input } from "@/shared/ui/atoms/input";
+import { GradientButton } from "@/shared/ui/atoms/button-variants";
 import { Send, Bot, User } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/shared/ui/atoms/scroll-area";
 
 interface Message {
   role: "user" | "assistant";
