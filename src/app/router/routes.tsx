@@ -1,6 +1,8 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { lazy, ReactNode } from "react";
 import { Navigation } from "@/widgets/header";
+import { AuthGuard } from "@/shared/lib/guards";
+import { ErrorBoundary } from "@/shared/lib/errorBoundary";
 
 // Lazy loading для страниц
 const OnboardingPage = lazy(() => import("@/pages/Onboarding"));
@@ -11,17 +13,6 @@ const IoTMonitorPage = lazy(() => import("@/pages/IoTMonitor"));
 const EducationPage = lazy(() => import("@/pages/Education"));
 const SettingsPage = lazy(() => import("@/pages/Settings"));
 const NotFoundPage = lazy(() => import("@/pages/NotFound"));
-
-// Protected Route компонент
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // TODO: Проверка через useUserQuery из entities/user
-  // Пока используем localStorage для проверки onboarding
-  const onboardingComplete = localStorage.getItem("peribloom_profile")
-    ? JSON.parse(localStorage.getItem("peribloom_profile") || "{}").onboardingComplete
-    : false;
-
-  return onboardingComplete ? <>{children}</> : <Navigate to="/" replace />;
-};
 
 // Layout с навигацией
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
@@ -55,9 +46,11 @@ export const router = createBrowserRouter([
     path: "/dashboard",
     element: (
       <AppLayout>
-        <ProtectedRoute>
-          <DashboardPage />
-        </ProtectedRoute>
+        <ErrorBoundary>
+          <AuthGuard>
+            <DashboardPage />
+          </AuthGuard>
+        </ErrorBoundary>
       </AppLayout>
     ),
   },
@@ -65,9 +58,11 @@ export const router = createBrowserRouter([
     path: "/ai-chat",
     element: (
       <AppLayout>
-        <ProtectedRoute>
-          <AIChatPage />
-        </ProtectedRoute>
+        <ErrorBoundary>
+          <AuthGuard>
+            <AIChatPage />
+          </AuthGuard>
+        </ErrorBoundary>
       </AppLayout>
     ),
   },
@@ -75,9 +70,11 @@ export const router = createBrowserRouter([
     path: "/symptoms",
     element: (
       <AppLayout>
-        <ProtectedRoute>
-          <SymptomsPage />
-        </ProtectedRoute>
+        <ErrorBoundary>
+          <AuthGuard>
+            <SymptomsPage />
+          </AuthGuard>
+        </ErrorBoundary>
       </AppLayout>
     ),
   },
@@ -85,9 +82,11 @@ export const router = createBrowserRouter([
     path: "/iot",
     element: (
       <AppLayout>
-        <ProtectedRoute>
-          <IoTMonitorPage />
-        </ProtectedRoute>
+        <ErrorBoundary>
+          <AuthGuard>
+            <IoTMonitorPage />
+          </AuthGuard>
+        </ErrorBoundary>
       </AppLayout>
     ),
   },
@@ -95,9 +94,11 @@ export const router = createBrowserRouter([
     path: "/education",
     element: (
       <AppLayout>
-        <ProtectedRoute>
-          <EducationPage />
-        </ProtectedRoute>
+        <ErrorBoundary>
+          <AuthGuard>
+            <EducationPage />
+          </AuthGuard>
+        </ErrorBoundary>
       </AppLayout>
     ),
   },
@@ -105,9 +106,11 @@ export const router = createBrowserRouter([
     path: "/settings",
     element: (
       <AppLayout>
-        <ProtectedRoute>
-          <SettingsPage />
-        </ProtectedRoute>
+        <ErrorBoundary>
+          <AuthGuard>
+            <SettingsPage />
+          </AuthGuard>
+        </ErrorBoundary>
       </AppLayout>
     ),
   },

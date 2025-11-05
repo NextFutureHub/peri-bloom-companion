@@ -1,15 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/shared/api/queryKeys";
-import {
-  fetchSymptoms,
-  fetchSymptom,
-  createSymptom,
-  updateSymptom,
-  deleteSymptom,
-  type CreateSymptomDto,
-  type UpdateSymptomDto,
-  type SymptomDto,
-} from "../api/symptom.client";
+import { fetchSymptoms, fetchSymptom, createSymptom, updateSymptom, deleteSymptom } from "../api/symptom.client";
+import type { CreateSymptomDto, UpdateSymptomDto, SymptomDto } from "@/shared/types/api/symptom.dto";
 
 /**
  * Hook для получения всех симптомов пользователя

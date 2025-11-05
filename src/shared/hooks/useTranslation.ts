@@ -1,13 +1,9 @@
-import { useContext, createContext } from "react";
-import { translations } from "@/shared/lib/i18n";
-import type { TranslationKey } from "@/shared/lib/i18n";
-import type { Language } from "@/shared/types";
-
-// Context для языка (можно использовать из провайдера)
-const LanguageContext = createContext<Language>("ru");
+import { useContext } from "react";
+import { translations, type Language } from "@/shared/config/i18n";
+import { useLanguage } from "@/app/providers/LanguageProvider";
 
 export const useTranslation = () => {
-  const language = useContext(LanguageContext) || "ru";
+  const { language } = useLanguage();
   const t = translations[language];
 
   const translate = (key: string): string => {

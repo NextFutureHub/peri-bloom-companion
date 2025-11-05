@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/shared/api/queryKeys";
-import { fetchMe, updateProfile, type UpdateProfileDto, type UserWithProfileResponseDto } from "../api/user.client";
+import { fetchMe, updateProfile } from "../api/user.client";
+import type { UpdateProfileDto, UserWithProfileResponseDto } from "@/shared/types/api/user.dto";
 
 /**
  * Hook для получения данных текущего пользователя

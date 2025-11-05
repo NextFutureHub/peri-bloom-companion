@@ -1,39 +1,32 @@
-import { api } from "@/shared/api/client";
-import type { ApiResponse } from "@/shared/types";
-
-export interface DeviceDto {
-  id: string;
-  userId: string;
-  name: string;
-  type: "arduino" | "sensor" | "other";
-  status: "connected" | "disconnected";
-  lastConnectedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface DeviceMetricsDto {
-  deviceId: string;
-  temperature?: number;
-  humidity?: number;
-  noise?: number;
-  timestamp: string;
-}
+import { BaseService } from "@/shared/api/baseService";
+import type { DeviceDto, DeviceMetricsDto } from "@/shared/types/api/device.dto";
 
 /**
- * Получить все устройства пользователя
+ * Device Service - работа с IoT устройствами
  */
-export const fetchDevices = (userId?: string): Promise<DeviceDto[]> => {
-  const params = userId ? { userId } : {};
-  return api.get<ApiResponse<DeviceDto[]>>("/devices", { params }).then((r) => r.data.data);
-};
+class DeviceService extends BaseService {
+  /**
+   * Получить все устройства пользователя
+   */
+  fetchDevices(userId?: string): Promise<DeviceDto[]> {
+    const params = userId ? { userId } : {};
+    return this.get<DeviceDto[]>("/devices", params);
+  }
 
-/**
- * Получить метрики устройства
- */
-export const fetchDeviceMetrics = (deviceId: string): Promise<DeviceMetricsDto[]> => {
-  return api
-    .get<ApiResponse<DeviceMetricsDto[]>>(`/devices/${deviceId}/metrics`)
-    .then((r) => r.data.data);
-};
+  /**
+   * Получить метрики устройства
+   */
+  fetchDeviceMetrics(deviceId: string): Promise<DeviceMetricsDto[]> {
+    return this.get<DeviceMetricsDto[]>(`/devices/${deviceId}/metrics`);
+  }
+}
+
+export const deviceService = new DeviceService();
+
+// Экспортируем методы для удобства
+export const fetchDevices = (userId?: string) => deviceService.fetchDevices(userId);
+export const fetchDeviceMetrics = (deviceId: string) => deviceService.fetchDeviceMetrics(deviceId);
+
+// Re-export типы
+export type { DeviceDto, DeviceMetricsDto } from "@/shared/types/api/device.dto";
 
