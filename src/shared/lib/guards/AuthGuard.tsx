@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useUserQuery } from "@/entities/user";
 import { ErrorBoundary } from "@/shared/lib/errorBoundary";
+import { tokenStorage } from "@/shared/api/client";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -13,7 +14,13 @@ interface AuthGuardProps {
  * Проверяет наличие пользователя и статус onboarding
  */
 export const AuthGuard = ({ children, fallback }: AuthGuardProps) => {
-  const { data: user, isLoading, isError } = useUserQuery();
+  const accessToken = tokenStorage.getAccessToken();
+  const { data: user, isLoading, isError } = useUserQuery("profile");
+
+  // Если нет токена, редиректим на главную
+  if (!accessToken) {
+    return <Navigate to="/" replace />;
+  }
 
   if (isLoading) {
     return (
@@ -30,8 +37,8 @@ export const AuthGuard = ({ children, fallback }: AuthGuardProps) => {
     return <Navigate to="/" replace />;
   }
 
-  // Проверяем статус onboarding
-  const onboardingComplete = user.profile?.lifeStage !== null;
+  // Проверяем статус onboarding - профиль должен быть заполнен
+  const onboardingComplete = user.profile?.lifeStage !== null && user.profile?.lifeStage !== undefined;
 
   if (!onboardingComplete) {
     return <Navigate to="/" replace />;

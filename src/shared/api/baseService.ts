@@ -1,38 +1,39 @@
 import { AxiosResponse } from "axios";
 import { api } from "./client";
-import type { ApiResponse } from "../types";
 
 /**
  * Базовый сервис для всех API клиентов
  * Предоставляет общие методы для работы с API
+ * 
+ * Бэкенд возвращает данные напрямую, без обертки в ApiResponse
  */
 export class BaseService {
   /**
    * GET запрос
    */
-  protected get<T>(url: string, params?: any): Promise<T> {
-    return api.get<ApiResponse<T>>(url, { params }).then((response) => response.data.data);
+  protected get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
+    return api.get<T>(url, { params }).then((response) => response.data);
   }
 
   /**
    * POST запрос
    */
-  protected post<T>(url: string, data?: any): Promise<T> {
-    return api.post<ApiResponse<T>>(url, data).then((response) => response.data.data);
+  protected post<T>(url: string, data?: unknown): Promise<T> {
+    return api.post<T>(url, data).then((response) => response.data);
   }
 
   /**
    * PATCH запрос
    */
-  protected patch<T>(url: string, data?: any): Promise<T> {
-    return api.patch<ApiResponse<T>>(url, data).then((response) => response.data.data);
+  protected patch<T>(url: string, data?: unknown): Promise<T> {
+    return api.patch<T>(url, data).then((response) => response.data);
   }
 
   /**
    * PUT запрос
    */
-  protected put<T>(url: string, data?: any): Promise<T> {
-    return api.put<ApiResponse<T>>(url, data).then((response) => response.data.data);
+  protected put<T>(url: string, data?: unknown): Promise<T> {
+    return api.put<T>(url, data).then((response) => response.data);
   }
 
   /**
@@ -45,8 +46,8 @@ export class BaseService {
   /**
    * GET запрос с полным ответом (для случаев, когда нужны headers, status и т.д.)
    */
-  protected getRaw<T>(url: string, params?: any): Promise<AxiosResponse<ApiResponse<T>>> {
-    return api.get<ApiResponse<T>>(url, { params });
+  protected getRaw<T>(url: string, params?: Record<string, unknown>): Promise<AxiosResponse<T>> {
+    return api.get<T>(url, { params });
   }
 }
 

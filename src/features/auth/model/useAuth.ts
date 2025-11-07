@@ -1,92 +1,120 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { login, register, refreshToken, logout, type LoginDto, type RegisterDto } from "../api/auth.client";
+import { useNavigate } from "react-router-dom";
+import {
+  login,
+  register,
+  registerProfile,
+  registerContext,
+  skipContext,
+  logout,
+} from "../api/auth.client";
+import type {
+  LoginDto,
+  RegisterDto,
+  RegisterProfileDto,
+  PregnancyContextDto,
+  PostpartumContextDto,
+  ChildcareContextDto,
+  AuthResponseDto,
+} from "@/shared/types/api/auth.dto";
 import { QUERY_KEYS } from "@/shared/api/queryKeys";
-import { toast } from "sonner";
 
 /**
- * Hook для входа пользователя
+ * Hook для входа в систему
  */
 export const useLogin = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: (credentials: LoginDto) => login(credentials),
-    onSuccess: (data) => {
-      // Сохраняем токены
-      if (data.accessToken) {
-        sessionStorage.setItem("accessToken", data.accessToken);
-      }
-      if (data.refreshToken) {
-        localStorage.setItem("refreshToken", data.refreshToken);
-      }
-
-      // Инвалидируем кеш пользователя для обновления данных
+    onSuccess: (data: AuthResponseDto) => {
+      // Инвалидируем кеш пользователя для получения актуальных данных
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.user() });
-
-      toast.success("Вход выполнен успешно");
-    },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Ошибка входа");
+      
+      // Редиректим в зависимости от статуса onboarding
+      if (data.onboardingStatus === "complete") {
+        navigate("/dashboard");
+      } else {
+        navigate("/");
+      }
     },
   });
 };
 
 /**
- * Hook для регистрации пользователя
+ * Hook для регистрации (шаг 1)
  */
 export const useRegister = () => {
   return useMutation({
     mutationFn: (data: RegisterDto) => register(data),
-    onSuccess: (data) => {
-      // Сохраняем registration token если есть
-      if (data.registrationToken) {
-        localStorage.setItem("registrationToken", data.registrationToken);
-      }
-      toast.success("Регистрация начата");
-    },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Ошибка регистрации");
-    },
   });
 };
 
 /**
- * Hook для обновления токена
+ * Hook для заполнения профиля (шаг 2)
  */
-export const useRefreshToken = () => {
+export const useRegisterProfile = () => {
   return useMutation({
-    mutationFn: (refreshTokenValue: string) => refreshToken(refreshTokenValue),
-    onSuccess: (data) => {
-      if (data.accessToken) {
-        sessionStorage.setItem("accessToken", data.accessToken);
-      }
+    mutationFn: (data: RegisterProfileDto) => registerProfile(data),
+  });
+};
+
+/**
+ * Hook для заполнения контекстных данных (шаг 3)
+ */
+export const useRegisterContext = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (
+      context: PregnancyContextDto | PostpartumContextDto | ChildcareContextDto
+    ) => registerContext(context),
+    onSuccess: (data: AuthResponseDto) => {
+      // Инвалидируем кеш пользователя
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.user() });
+      
+      // Редиректим на dashboard
+      navigate("/dashboard");
     },
   });
 };
 
 /**
- * Hook для выхода
+ * Hook для пропуска шага 3
+ */
+export const useSkipContext = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: () => skipContext(),
+    onSuccess: (data: AuthResponseDto) => {
+      // Инвалидируем кеш пользователя
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.user() });
+      
+      // Редиректим на dashboard
+      navigate("/dashboard");
+    },
+  });
+};
+
+/**
+ * Hook для выхода из системы
  */
 export const useLogout = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: logout,
+    mutationFn: () => logout(),
     onSuccess: () => {
       // Очищаем весь кеш
       queryClient.clear();
-      toast.success("Выход выполнен");
-      // Редирект на страницу входа
-      window.location.href = "/";
-    },
-    onError: () => {
-      // Даже если запрос не удался, очищаем локально
-      queryClient.clear();
-      sessionStorage.clear();
-      localStorage.clear();
-      window.location.href = "/";
+      
+      // Редиректим на главную страницу
+      navigate("/");
     },
   });
 };
-
-
