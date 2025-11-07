@@ -21,7 +21,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     : false;
 
   return (
-    <div className="pb-20 md:pb-0 md:pt-20">
+    <div className={onboardingComplete ? "pb-20 md:pb-0 md:pt-20" : ""}>
       {onboardingComplete && <Navigation />}
       {children}
     </div>

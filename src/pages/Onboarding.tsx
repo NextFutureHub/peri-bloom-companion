@@ -52,7 +52,7 @@ const Onboarding = () => {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="h-screen flex items-center justify-center p-4 overflow-hidden">
       <Card className="w-full max-w-lg shadow-soft animate-float">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 rounded-full gradient-primary flex items-center justify-center shadow-glow">
