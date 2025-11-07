@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { QueryProvider } from "./QueryProvider";
 import { ThemeProvider } from "./ThemeProvider";
 import { LanguageProvider } from "./LanguageProvider";
+import { AppProvider } from "@/contexts/AppContext";
 import { TooltipProvider } from "@/shared/ui/atoms/tooltip";
 import { Toaster } from "@/shared/ui/atoms/toaster";
 import { Toaster as Sonner } from "@/shared/ui/atoms/sonner";
@@ -14,14 +15,16 @@ export const AppProviders = ({ children }: { children: ReactNode }) => {
       <QueryProvider>
         <ThemeProvider>
           <LanguageProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              {children}
-              {import.meta.env.DEV && (
-                <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
-              )}
-            </TooltipProvider>
+            <AppProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                {children}
+                {import.meta.env.DEV && (
+                  <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+                )}
+              </TooltipProvider>
+            </AppProvider>
           </LanguageProvider>
         </ThemeProvider>
       </QueryProvider>

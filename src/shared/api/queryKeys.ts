@@ -31,3 +31,4 @@ export const QUERY_KEYS = {
   educationArticle: (id: string) => ["education", "article", id] as const,
 } as const;
 
+

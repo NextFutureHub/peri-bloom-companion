@@ -17,3 +17,4 @@ export interface CreateSymptomDto {
 
 export interface UpdateSymptomDto extends Partial<CreateSymptomDto> {}
 
+
