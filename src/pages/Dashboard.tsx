@@ -1,34 +1,81 @@
-import { useApp } from "@/contexts/AppContext";
 import { useTranslation } from "@/shared/hooks/useTranslation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { GradientButton } from "@/shared/ui/atoms/button-variants";
 import { MessageCircle, BookOpen, FileText, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUserQuery } from "@/entities/user";
 
 const Dashboard = () => {
-  const { profile } = useApp();
+  const { data: user, isLoading } = useUserQuery("profile");
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const getWeeksPregnant = () => {
-    if (!profile.dueDate) return 0;
-    const due = new Date(profile.dueDate);
-    const now = new Date();
-    const diff = due.getTime() - now.getTime();
-    const weeks = 40 - Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
-    return Math.max(0, Math.min(42, weeks));
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="mt-4 text-muted-foreground">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user?.profile) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Профиль не найден</p>
+      </div>
+    );
+  }
+
+  const profile = user.profile;
+  const userName = profile.name || "Пользователь";
+
+  // Получаем недели беременности из API или рассчитываем
+  const getWeeksPregnant = (): number => {
+    // Если есть gestationalAgeWeeks из API - используем его
+    if (profile.gestationalAgeWeeks) {
+      return profile.gestationalAgeWeeks;
+    }
+    
+    // Иначе рассчитываем из estimatedDueDate
+    if (profile.estimatedDueDate) {
+      const due = new Date(profile.estimatedDueDate);
+      const now = new Date();
+      const diff = due.getTime() - now.getTime();
+      const weeks = 40 - Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+      return Math.max(0, Math.min(42, weeks));
+    }
+    
+    return 0;
   };
 
-  const getChildAgeMonths = () => {
-    if (!profile.childBirthDate) return 0;
-    const birth = new Date(profile.childBirthDate);
-    const now = new Date();
-    const diff = now.getTime() - birth.getTime();
-    return Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+  // Получаем возраст ребенка в месяцах
+  const getChildAgeMonths = (): number => {
+    if (profile.deliveryDate) {
+      const birth = new Date(profile.deliveryDate);
+      const now = new Date();
+      const diff = now.getTime() - birth.getTime();
+      return Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+    }
+    
+    // Проверяем children если есть
+    if (profile.children && Array.isArray(profile.children) && profile.children.length > 0) {
+      const firstChild = profile.children[0] as { dateOfBirth?: string };
+      if (firstChild?.dateOfBirth) {
+        const birth = new Date(firstChild.dateOfBirth);
+        const now = new Date();
+        const diff = now.getTime() - birth.getTime();
+        return Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+      }
+    }
+    
+    return 0;
   };
 
-  const weeks = profile.lifeStage === "pregnant" ? getWeeksPregnant() : 0;
-  const months = profile.lifeStage !== "pregnant" ? getChildAgeMonths() : 0;
+  const weeks = profile.lifeStage === "pregnancy" ? getWeeksPregnant() : 0;
+  const months = profile.lifeStage !== "pregnancy" ? getChildAgeMonths() : 0;
 
   const quickActions = [
     {
@@ -63,15 +110,20 @@ const Dashboard = () => {
               <Heart className="w-10 h-10 text-white" />
             </div>
             <CardTitle className="text-4xl">
-              Здравствуйте, {profile.name}! 💗
+              Здравствуйте, {userName}! 💗
             </CardTitle>
             <CardDescription className="text-lg mt-2">
-              {profile.lifeStage === "pregnant" && (
+              {profile.lifeStage === "pregnancy" && (
                 <span className="text-primary font-semibold">
                   {weeks} {t("dashboard.weeksPregnant")}
                 </span>
               )}
-              {profile.lifeStage !== "pregnant" && (
+              {profile.lifeStage === "postpartum" && (
+                <span className="text-primary font-semibold">
+                  {t("dashboard.childAge")}: {months} {t("dashboard.months")}
+                </span>
+              )}
+              {profile.lifeStage === "childcare" && (
                 <span className="text-primary font-semibold">
                   {t("dashboard.childAge")}: {months} {t("dashboard.months")}
                 </span>

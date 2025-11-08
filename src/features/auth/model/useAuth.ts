@@ -33,10 +33,22 @@ export const useLogin = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.user() });
       
       // Редиректим в зависимости от статуса onboarding
-      if (data.onboardingStatus === "complete") {
-        navigate("/dashboard");
+      // Если есть accessToken (не пустой) и нет registrationToken - onboarding завершен
+      // Если есть registrationToken - onboarding не завершен
+      const hasValidAccessToken = data.accessToken && data.accessToken.trim() !== "";
+      const hasRegistrationToken = !!data.registrationToken;
+      
+      if (hasValidAccessToken && !hasRegistrationToken) {
+        // Onboarding завершен - редирект на dashboard
+        // Используем window.location для принудительного редиректа
+        window.location.href = "/dashboard";
+      } else if (hasRegistrationToken) {
+        // Onboarding не завершен - остаемся на странице регистрации
+        // Обновляем registrationToken в storage (уже сохранен в auth.client.ts)
+        navigate("/", { replace: true });
       } else {
-        navigate("/");
+        // Fallback - редирект на главную
+        navigate("/", { replace: true });
       }
     },
   });

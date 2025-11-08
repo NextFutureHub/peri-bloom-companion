@@ -3,21 +3,37 @@ import { useTranslation } from "@/shared/hooks/useTranslation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { Label } from "@/shared/ui/atoms/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/atoms/select";
-import { SoftButton } from "@/shared/ui/atoms/button-variants";
-import { Settings as SettingsIcon, Globe, Trash2 } from "lucide-react";
+import { SoftButton, GradientButton } from "@/shared/ui/atoms/button-variants";
+import { Settings as SettingsIcon, Globe, Trash2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useLogout } from "@/features/auth";
 
 const Settings = () => {
   const { profile, language, setLanguage, resetProfile } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const logoutMutation = useLogout();
 
   const handleReset = () => {
     if (confirm("Вы уверены, что хотите сбросить все данные?")) {
       resetProfile();
       toast.success("Данные сброшены");
       navigate("/");
+    }
+  };
+
+  const handleLogout = () => {
+    if (confirm("Вы уверены, что хотите выйти из аккаунта?")) {
+      logoutMutation.mutate(undefined, {
+        onSuccess: () => {
+          toast.success("Вы успешно вышли из аккаунта");
+        },
+        onError: (error: unknown) => {
+          const message = error instanceof Error ? error.message : "Ошибка при выходе";
+          toast.error(message);
+        },
+      });
     }
   };
 
@@ -56,7 +72,16 @@ const Settings = () => {
               </div>
             </div>
 
-            <div className="pt-6 border-t">
+            <div className="pt-6 border-t space-y-3">
+              <GradientButton
+                onClick={handleLogout}
+                className="w-full"
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                {logoutMutation.isPending ? "Выход..." : "Выйти из аккаунта"}
+              </GradientButton>
+              
               <SoftButton
                 onClick={handleReset}
                 className="w-full text-destructive hover:text-destructive"

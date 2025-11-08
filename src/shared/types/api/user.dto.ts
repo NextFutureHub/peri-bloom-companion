@@ -28,6 +28,7 @@ export interface UserProfileDto {
   ivfTransferDate?: string | null;
   pregnancyDueDate?: string | null; // legacy
   conceptionDate?: string | null;
+  gestationalAgeWeeks?: number | null; // Текущий срок беременности в неделях (рассчитывается автоматически)
   
   // Postpartum/Childcare fields
   deliveryDate?: string | null;

@@ -15,7 +15,9 @@ interface AuthGuardProps {
  */
 export const AuthGuard = ({ children, fallback }: AuthGuardProps) => {
   const accessToken = tokenStorage.getAccessToken();
-  const { data: user, isLoading, isError } = useUserQuery("profile");
+  const { data: user, isLoading, isError } = useUserQuery("profile", {
+    enabled: !!accessToken,
+  });
 
   // Если нет токена, редиректим на главную
   if (!accessToken) {

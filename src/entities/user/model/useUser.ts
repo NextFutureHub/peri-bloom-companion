@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/shared/api/queryKeys";
 import { fetchMe, updateProfile } from "../api/user.client";
 import type { UpdateProfileDto, UserWithProfileResponseDto } from "@/shared/types/api/user.dto";
@@ -6,12 +6,16 @@ import type { UpdateProfileDto, UserWithProfileResponseDto } from "@/shared/type
 /**
  * Hook для получения данных текущего пользователя
  */
-export const useUserQuery = (include?: string) => {
+export const useUserQuery = (
+  include?: string,
+  options?: Omit<UseQueryOptions<UserWithProfileResponseDto>, "queryKey" | "queryFn">
+) => {
   return useQuery({
     queryKey: QUERY_KEYS.user(),
     queryFn: () => fetchMe(include),
     staleTime: 1000 * 60 * 2, // 2 минуты
     refetchOnWindowFocus: false,
+    ...options,
   });
 };
 

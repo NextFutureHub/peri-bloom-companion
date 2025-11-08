@@ -7,6 +7,7 @@ import { GradientButton, SoftButton } from "@/shared/ui/atoms/button-variants";
 import { Heart, Baby, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import {
+  useLogin,
   useRegister,
   useRegisterProfile,
   useRegisterContext,
@@ -27,11 +28,14 @@ const Onboarding = () => {
   // Проверяем, есть ли уже registrationToken
   const hasRegistrationToken = !!tokenStorage.getRegistrationToken();
   
-  // Если есть registrationToken, начинаем с шага 1 (имя), иначе с шага 0 (регистрация)
+  // Если есть registrationToken, начинаем с шага 1 (имя), иначе с шага 0 (регистрация/вход)
   const [step, setStep] = useState(hasRegistrationToken ? 1 : 0);
   
+  // Режим: регистрация или вход
+  const [isLoginMode, setIsLoginMode] = useState(false);
+  
   const [formData, setFormData] = useState({
-    // Шаг 0: регистрация
+    // Шаг 0: регистрация/вход
     email: "",
     password: "",
     confirmPassword: "",
@@ -52,12 +56,14 @@ const Onboarding = () => {
     children: [{ name: "", dateOfBirth: "", sex: "female" as "male" | "female" | "other" }],
   });
 
+  const loginMutation = useLogin();
   const registerMutation = useRegister();
   const registerProfileMutation = useRegisterProfile();
   const registerContextMutation = useRegisterContext();
   const skipContextMutation = useSkipContext();
 
   const isLoading =
+    loginMutation.isPending ||
     registerMutation.isPending ||
     registerProfileMutation.isPending ||
     registerContextMutation.isPending ||
@@ -65,7 +71,7 @@ const Onboarding = () => {
 
   const handleNext = async () => {
     if (step === 0) {
-      // Шаг 0: Регистрация (email + password)
+      // Шаг 0: Регистрация или Вход
       if (!formData.email.trim()) {
         toast.error("Пожалуйста, введите email");
         return;
@@ -74,25 +80,41 @@ const Onboarding = () => {
         toast.error("Пожалуйста, введите пароль");
         return;
       }
-      if (formData.password.length < 6) {
-        toast.error("Пароль должен содержать минимум 6 символов");
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        toast.error("Пароли не совпадают");
-        return;
-      }
 
-      try {
-        await registerMutation.mutateAsync({
-          email: formData.email,
-          password: formData.password,
-        });
-        toast.success("Регистрация успешна! Продолжаем...");
-        setStep(1);
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "Ошибка при регистрации";
-        toast.error(message);
+      if (isLoginMode) {
+        // Вход
+        try {
+          await loginMutation.mutateAsync({
+            email: formData.email,
+            password: formData.password,
+          });
+          // Редирект произойдет автоматически через useLogin
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : "Ошибка при входе";
+          toast.error(message);
+        }
+      } else {
+        // Регистрация
+        if (formData.password.length < 6) {
+          toast.error("Пароль должен содержать минимум 6 символов");
+          return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("Пароли не совпадают");
+          return;
+        }
+
+        try {
+          await registerMutation.mutateAsync({
+            email: formData.email,
+            password: formData.password,
+          });
+          toast.success("Регистрация успешна! Продолжаем...");
+          setStep(1);
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : "Ошибка при регистрации";
+          toast.error(message);
+        }
       }
     } else if (step === 1) {
       // Шаг 1: Имя
@@ -210,7 +232,7 @@ const Onboarding = () => {
           </div>
           <CardTitle className="text-3xl">{t("onboarding.title")}</CardTitle>
           <CardDescription className="text-base">
-            {step === 0 && "Создайте аккаунт для начала"}
+            {step === 0 && (isLoginMode ? "Войдите в свой аккаунт" : "Создайте аккаунт для начала")}
             {step === 1 && t("onboarding.nameLabel")}
             {step === 2 && t("onboarding.stageLabel")}
             {step === 3 && "Последний шаг"}
@@ -219,6 +241,40 @@ const Onboarding = () => {
         <CardContent className="space-y-6">
           {step === 0 && (
             <div className="space-y-4">
+              {/* Переключатель между регистрацией и входом */}
+              <div className="flex gap-2 p-1 bg-muted rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLoginMode(false);
+                    setFormData({ ...formData, confirmPassword: "" });
+                  }}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-smooth ${
+                    !isLoginMode
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  disabled={isLoading}
+                >
+                  Регистрация
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLoginMode(true);
+                    setFormData({ ...formData, confirmPassword: "" });
+                  }}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-smooth ${
+                    isLoginMode
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  disabled={isLoading}
+                >
+                  Вход
+                </button>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email *</Label>
                 <Input
@@ -236,25 +292,27 @@ const Onboarding = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Минимум 6 символов"
+                  placeholder={isLoginMode ? "Введите пароль" : "Минимум 6 символов"}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="transition-smooth"
                   disabled={isLoading}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Подтвердите пароль *</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Повторите пароль"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="transition-smooth"
-                  disabled={isLoading}
-                />
-              </div>
+              {!isLoginMode && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Подтвердите пароль *</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Повторите пароль"
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    className="transition-smooth"
+                    disabled={isLoading}
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -545,7 +603,13 @@ const Onboarding = () => {
             )}
             {step < 3 ? (
               <GradientButton onClick={handleNext} className="flex-1" disabled={isLoading}>
-                {isLoading ? "Загрузка..." : t("onboarding.next")}
+                {isLoading
+                  ? "Загрузка..."
+                  : step === 0
+                    ? isLoginMode
+                      ? "Войти"
+                      : "Зарегистрироваться"
+                    : t("onboarding.next")}
               </GradientButton>
             ) : (
               <>

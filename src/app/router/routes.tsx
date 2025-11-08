@@ -3,6 +3,8 @@ import { lazy, ReactNode } from "react";
 import { Navigation } from "@/widgets/header";
 import { AuthGuard } from "@/shared/lib/guards";
 import { ErrorBoundary } from "@/shared/lib/errorBoundary";
+import { useUserQuery } from "@/entities/user";
+import { tokenStorage } from "@/shared/api/client";
 
 // Lazy loading для страниц
 const OnboardingPage = lazy(() => import("@/pages/Onboarding"));
@@ -16,9 +18,17 @@ const NotFoundPage = lazy(() => import("@/pages/NotFound"));
 
 // Layout с навигацией
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
-  const onboardingComplete = localStorage.getItem("peribloom_profile")
-    ? JSON.parse(localStorage.getItem("peribloom_profile") || "{}").onboardingComplete
-    : false;
+  const accessToken = tokenStorage.getAccessToken();
+  // Запрос выполняется только если есть токен
+  const { data: user } = useUserQuery("profile", {
+    enabled: !!accessToken,
+  });
+  
+  // Проверяем onboarding статус через API
+  const onboardingComplete = 
+    accessToken && 
+    user?.profile?.lifeStage !== null && 
+    user?.profile?.lifeStage !== undefined;
 
   return (
     <div className={onboardingComplete ? "pb-20 md:pb-0 md:pt-20" : ""}>
@@ -28,19 +38,43 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// Компонент для главной страницы с проверкой авторизации
+const HomePage = () => {
+  const accessToken = tokenStorage.getAccessToken();
+  // Запрос выполняется только если есть токен
+  const { data: user, isLoading } = useUserQuery("profile", {
+    enabled: !!accessToken,
+  });
+
+  // Если загружается и есть токен, показываем загрузку
+  if (accessToken && isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="mt-4 text-muted-foreground">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Если есть токен и пользователь авторизован с завершенным onboarding
+  if (accessToken && user?.profile?.lifeStage) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Иначе показываем onboarding
+  return <OnboardingPage />;
+};
+
 export const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <AppLayout>
-        <OnboardingPage />
+        <HomePage />
       </AppLayout>
     ),
-    // TODO: Добавить loader для prefetch данных
-    // loader: async () => {
-    //   // Prefetch user data if needed
-    //   return null;
-    // },
   },
   {
     path: "/dashboard",
