@@ -1,10 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "@/shared/hooks/useTranslation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/atoms/card";
 import { GradientButton, SoftButton } from "@/shared/ui/atoms/button-variants";
-import { Plus, Calendar, Trash2, Download } from "lucide-react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { Plus, Calendar, Trash2, Filter, X, AlertCircle, CheckCircle2, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,198 +14,226 @@ import { Input } from "@/shared/ui/atoms/input";
 import { Label } from "@/shared/ui/atoms/label";
 import { Textarea } from "@/shared/ui/atoms/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/atoms/select";
+import { Badge } from "@/shared/ui/atoms/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/atoms/tabs";
 import { toast } from "sonner";
-
-interface Symptom {
-  id: string;
-  date: string;
-  name: string;
-  severity: "low" | "medium" | "high";
-  notes: string;
-}
+import { useSymptomsQuery, useCreateSymptom, useDeleteSymptom } from "@/entities/symptom/model/useSymptom";
+import type { SymptomCategory, SymptomDto, TriageLevel } from "@/shared/types/api/symptom.dto";
+import { SymptomForm } from "@/features/symptoms/ui/SymptomForm";
+import { SymptomCard } from "@/features/symptoms/ui/SymptomCard";
+import { SymptomChart } from "@/features/symptoms/ui/SymptomChart";
 
 const Symptoms = () => {
   const { t } = useTranslation();
-  const [symptoms, setSymptoms] = useState<Symptom[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    severity: "medium" as "low" | "medium" | "high",
-    notes: "",
-  });
-  const contentRef = useRef<HTMLDivElement>(null);
+  const [selectedCategory, setSelectedCategory] = useState<SymptomCategory | undefined>();
+  const [dateFilter, setDateFilter] = useState<{ start?: string; end?: string }>({});
 
-  const handleAdd = () => {
-    if (!formData.name.trim()) {
-      toast.error("Введите название симптома");
-      return;
-    }
+  const { data: symptoms = [], isLoading } = useSymptomsQuery(
+    undefined,
+    selectedCategory,
+    dateFilter.start,
+    dateFilter.end,
+  );
 
-    const newSymptom: Symptom = {
-      id: Date.now().toString(),
-      date: new Date().toISOString().split("T")[0],
-      ...formData,
-    };
+  const createMutation = useCreateSymptom();
+  const deleteMutation = useDeleteSymptom();
 
-    setSymptoms((prev) => [newSymptom, ...prev]);
-    setFormData({ name: "", severity: "medium", notes: "" });
-    setIsDialogOpen(false);
-    toast.success("Симптом добавлен");
-  };
+  const filteredSymptoms = useMemo(() => {
+    return symptoms;
+  }, [symptoms]);
 
-  const handleDelete = (id: string) => {
-    setSymptoms((prev) => prev.filter((s) => s.id !== id));
-    toast.success("Симптом удален");
-  };
-
-  const exportToPDF = async () => {
-    if (!contentRef.current || symptoms.length === 0) {
-      toast.error("Нет данных для экспорта");
-      return;
-    }
-
+  const handleCreate = async (data: {
+    category: SymptomCategory;
+    name: string;
+    intensity: number;
+    startDate: string;
+    endDate?: string;
+    note?: string;
+  }) => {
     try {
-      const canvas = await html2canvas(contentRef.current, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-      });
-      
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`symptoms_${new Date().toISOString().split('T')[0]}.pdf`);
-      
-      toast.success(t("symptoms.pdfExported"));
+      await createMutation.mutateAsync(data);
+      setIsDialogOpen(false);
+      toast.success("Симптом успешно добавлен");
     } catch (error) {
-      console.error("PDF export error:", error);
-      toast.error("Ошибка экспорта PDF");
+      toast.error("Ошибка при добавлении симптома");
     }
   };
 
-  const severityColors = {
-    low: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-    medium: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-    high: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success("Симптом удалён");
+    } catch (error) {
+      toast.error("Ошибка при удалении симптома");
+    }
+  };
+
+  const getTriageIcon = (level: TriageLevel | null | undefined) => {
+    if (!level) return null;
+    switch (level) {
+      case "low":
+        return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      case "medium":
+        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      case "high":
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
+    }
+  };
+
+  const getTriageLabel = (level: TriageLevel | null | undefined) => {
+    if (!level) return "Анализ выполняется...";
+    switch (level) {
+      case "low":
+        return "Низкий риск";
+      case "medium":
+        return "Средний риск";
+      case "high":
+        return "Высокий риск";
+    }
+  };
+
+  const categoryLabels: Record<SymptomCategory, string> = {
+    physical: "Физический",
+    emotional: "Эмоциональный",
+    cognitive: "Когнитивный",
   };
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <Card className="shadow-soft">
-          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-6 h-6 text-primary" />
-              {t("symptoms.title")}
-            </CardTitle>
-            <div className="flex gap-2">
-              {symptoms.length > 0 && (
-                <SoftButton onClick={exportToPDF} size="sm">
-                  <Download className="w-4 h-4 mr-2" />
-                  {t("symptoms.exportPDF")}
-                </SoftButton>
-              )}
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-6 h-6 text-primary" />
+                {t("symptoms.title") || "Симптомы"}
+              </CardTitle>
+              <CardDescription>
+                Отслеживайте своё состояние и получайте персонализированные рекомендации
+              </CardDescription>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <GradientButton size="sm">
                   <Plus className="w-4 h-4 mr-2" />
-                  {t("symptoms.addSymptom")}
+                  {t("symptoms.addSymptom") || "Добавить симптом"}
                 </GradientButton>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{t("symptoms.addSymptom")}</DialogTitle>
+                  <DialogTitle>{t("symptoms.addSymptom") || "Добавить симптом"}</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>{t("symptoms.symptomName")}</Label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Например: головная боль"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("symptoms.severity")}</Label>
-                    <Select
-                      value={formData.severity}
-                      onValueChange={(value: any) => setFormData({ ...formData, severity: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">{t("symptoms.severityLow")}</SelectItem>
-                        <SelectItem value="medium">{t("symptoms.severityMedium")}</SelectItem>
-                        <SelectItem value="high">{t("symptoms.severityHigh")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("symptoms.notes")}</Label>
-                    <Textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder="Дополнительная информация..."
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <SoftButton onClick={() => setIsDialogOpen(false)} className="flex-1">
-                      {t("symptoms.cancel")}
-                    </SoftButton>
-                    <GradientButton onClick={handleAdd} className="flex-1">
-                      {t("symptoms.save")}
-                    </GradientButton>
-                  </div>
-                </div>
+                <SymptomForm
+                  onSubmit={handleCreate}
+                  onCancel={() => setIsDialogOpen(false)}
+                  isLoading={createMutation.isPending}
+                />
               </DialogContent>
             </Dialog>
-            </div>
           </CardHeader>
-          <CardContent ref={contentRef}>
-            {symptoms.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <p>{t("symptoms.noSymptoms")}</p>
+        </Card>
+
+        {/* Фильтры */}
+        <Card className="shadow-soft">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap gap-4 items-end">
+              <div className="flex-1 min-w-[200px]">
+                <Label>Категория</Label>
+                <Select
+                  value={selectedCategory || "all"}
+                  onValueChange={(value) =>
+                    setSelectedCategory(value === "all" ? undefined : (value as SymptomCategory))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все категории</SelectItem>
+                    <SelectItem value="physical">Физический</SelectItem>
+                    <SelectItem value="emotional">Эмоциональный</SelectItem>
+                    <SelectItem value="cognitive">Когнитивный</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+              <div className="flex-1 min-w-[200px]">
+                <Label>Дата начала</Label>
+                <Input
+                  type="date"
+                  value={dateFilter.start || ""}
+                  onChange={(e) =>
+                    setDateFilter((prev) => ({ ...prev, start: e.target.value || undefined }))
+                  }
+                />
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                <Label>Дата окончания</Label>
+                <Input
+                  type="date"
+                  value={dateFilter.end || ""}
+                  onChange={(e) =>
+                    setDateFilter((prev) => ({ ...prev, end: e.target.value || undefined }))
+                  }
+                />
+              </div>
+              {(selectedCategory || dateFilter.start || dateFilter.end) && (
+                <SoftButton
+                  onClick={() => {
+                    setSelectedCategory(undefined);
+                    setDateFilter({});
+                  }}
+                  variant="outline"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Сбросить
+                </SoftButton>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Контент с табами */}
+        <Tabs defaultValue="list" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="list">Список</TabsTrigger>
+            <TabsTrigger value="chart">Графики</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="list" className="space-y-4">
+            {isLoading ? (
+              <Card className="shadow-soft">
+                <CardContent className="p-12 text-center text-muted-foreground">
+                  Загрузка...
+                </CardContent>
+              </Card>
+            ) : filteredSymptoms.length === 0 ? (
+              <Card className="shadow-soft">
+                <CardContent className="p-12 text-center text-muted-foreground">
+                  <p>Нет записей симптомов</p>
+                  <p className="text-sm mt-2">Добавьте первый симптом, чтобы начать отслеживание</p>
+                </CardContent>
+              </Card>
             ) : (
-              <div className="space-y-3">
-                {symptoms.map((symptom) => (
-                  <Card key={symptom.id} className="shadow-soft">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold">{symptom.name}</h3>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full ${
-                                severityColors[symptom.severity]
-                              }`}
-                            >
-                              {t(`symptoms.severity${symptom.severity.charAt(0).toUpperCase() + symptom.severity.slice(1)}`)}
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">{symptom.date}</p>
-                          {symptom.notes && (
-                            <p className="text-sm">{symptom.notes}</p>
-                          )}
-                        </div>
-                        <SoftButton
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleDelete(symptom.id)}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </SoftButton>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredSymptoms.map((symptom) => (
+                  <SymptomCard
+                    key={symptom.id}
+                    symptom={symptom}
+                    onDelete={handleDelete}
+                    getTriageIcon={getTriageIcon}
+                    getTriageLabel={getTriageLabel}
+                    categoryLabel={categoryLabels[symptom.category]}
+                  />
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </TabsContent>
+
+          <TabsContent value="chart" className="space-y-4">
+            <SymptomChart symptoms={filteredSymptoms} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

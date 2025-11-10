@@ -1,15 +1,32 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/shared/api/queryKeys";
-import { fetchSymptoms, fetchSymptom, createSymptom, updateSymptom, deleteSymptom } from "../api/symptom.client";
-import type { CreateSymptomDto, UpdateSymptomDto, SymptomDto } from "@/shared/types/api/symptom.dto";
+import {
+  fetchSymptoms,
+  fetchSymptom,
+  fetchSymptomAnalysis,
+  createSymptom,
+  updateSymptom,
+  deleteSymptom,
+} from "../api/symptom.client";
+import type {
+  CreateSymptomDto,
+  UpdateSymptomDto,
+  SymptomDto,
+  SymptomCategory,
+} from "@/shared/types/api/symptom.dto";
 
 /**
  * Hook для получения всех симптомов пользователя
  */
-export const useSymptomsQuery = (userId?: string) => {
+export const useSymptomsQuery = (
+  userId?: string,
+  category?: SymptomCategory,
+  startDate?: string,
+  endDate?: string,
+) => {
   return useQuery({
-    queryKey: QUERY_KEYS.symptoms(userId),
-    queryFn: () => fetchSymptoms(userId),
+    queryKey: [...QUERY_KEYS.symptoms(userId), category, startDate, endDate],
+    queryFn: () => fetchSymptoms(userId, category, startDate, endDate),
     staleTime: 1000 * 60 * 5, // 5 минут
   });
 };
@@ -22,6 +39,18 @@ export const useSymptomQuery = (id: string) => {
     queryKey: QUERY_KEYS.symptom(id),
     queryFn: () => fetchSymptom(id),
     enabled: !!id,
+  });
+};
+
+/**
+ * Hook для получения AI-анализа симптома
+ */
+export const useSymptomAnalysisQuery = (id: string) => {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.symptom(id), "analysis"],
+    queryFn: () => fetchSymptomAnalysis(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 10, // 10 минут (анализ не меняется часто)
   });
 };
 
