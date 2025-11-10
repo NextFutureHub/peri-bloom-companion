@@ -15,6 +15,15 @@ export interface AiChatResponseDto {
 }
 
 /**
+ * История чата и текущая сессия
+ */
+export interface AiChatHistoryResponseDto {
+  sessionId: string;
+  lifeStage: "pregnancy" | "postpartum" | "childcare";
+  messages: ChatMessage[];
+}
+
+/**
  * Сообщение в чате
  */
 export interface ChatMessage {

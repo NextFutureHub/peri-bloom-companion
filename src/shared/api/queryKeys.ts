@@ -20,6 +20,7 @@ export const QUERY_KEYS = {
   // AI Chat queries
   aiMessages: (conversationId?: string) => ["aiMessages", conversationId ?? "default"] as const,
   aiConversations: () => ["aiConversations"] as const,
+  aiChatSession: () => ["aiChat", "session"] as const,
 
   // IoT Device queries
   devices: (userId?: string) => ["devices", userId ?? "me"] as const,
