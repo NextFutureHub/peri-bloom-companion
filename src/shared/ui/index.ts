@@ -10,6 +10,7 @@ export * from "./atoms/toast";
 export { Toaster as ShadcnToaster } from "./atoms/toaster";
 export { Toaster as SonnerToaster, toast } from "./atoms/sonner";
 export * from "./atoms/tooltip";
+export * from "./atoms/scroll-area";
 
 
 
