@@ -119,7 +119,17 @@ const IoTMonitor = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="relative min-h-screen p-6">
+      {/* Hint overlay - z-40 чтобы навигация (z-50) была поверх */}
+      <div className="fixed inset-0 z-40 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+        <div className="relative z-10 bg-background/95 backdrop-blur-md rounded-lg shadow-lg px-6 py-4 border border-border">
+          <p className="text-lg font-semibold text-foreground text-center">
+            Скоро наши устройства поступят в продажу
+          </p>
+        </div>
+      </div>
+
       <div className="max-w-4xl mx-auto space-y-6">
         <Card className="shadow-soft">
           <CardHeader className="flex flex-row items-center justify-between">
