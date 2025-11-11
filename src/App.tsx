@@ -11,6 +11,7 @@ import Symptoms from "./pages/Symptoms";
 import IoTMonitor from "./pages/IoTMonitor";
 import Education from "./pages/Education";
 import Settings from "./pages/Settings";
+import EducationModule from "./pages/EducationModule";
 import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +36,7 @@ const AppRoutes = () => {
           <Route path="/symptoms" element={<ProtectedRoute><Symptoms /></ProtectedRoute>} />
           <Route path="/iot" element={<ProtectedRoute><IoTMonitor /></ProtectedRoute>} />
           <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
+          <Route path="/education/:moduleId" element={<ProtectedRoute><EducationModule /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>

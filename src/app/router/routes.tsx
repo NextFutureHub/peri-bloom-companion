@@ -13,6 +13,7 @@ const AIChatPage = lazy(() => import("@/pages/AIChat"));
 const SymptomsPage = lazy(() => import("@/pages/Symptoms"));
 const IoTMonitorPage = lazy(() => import("@/pages/IoTMonitor"));
 const EducationPage = lazy(() => import("@/pages/Education"));
+const EducationModulePage = lazy(() => import("@/pages/EducationModule"));
 const SettingsPage = lazy(() => import("@/pages/Settings"));
 const NotFoundPage = lazy(() => import("@/pages/NotFound"));
 
@@ -131,6 +132,18 @@ export const router = createBrowserRouter([
         <ErrorBoundary>
           <AuthGuard>
             <EducationPage />
+          </AuthGuard>
+        </ErrorBoundary>
+      </AppLayout>
+    ),
+  },
+  {
+    path: "/education/:moduleId",
+    element: (
+      <AppLayout>
+        <ErrorBoundary>
+          <AuthGuard>
+            <EducationModulePage />
           </AuthGuard>
         </ErrorBoundary>
       </AppLayout>

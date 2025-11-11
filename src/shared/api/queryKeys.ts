@@ -28,8 +28,10 @@ export const QUERY_KEYS = {
   deviceMetrics: (deviceId: string) => ["device", "metrics", deviceId] as const,
 
   // Education queries
-  education: (category?: string) => ["education", category ?? "all"] as const,
-  educationArticle: (id: string) => ["education", "article", id] as const,
+  educationModules: (filters?: unknown) => ["education", "modules", filters ?? {}] as const,
+  educationModule: (id: string) => ["education", "modules", id] as const,
+  educationModuleLessons: (moduleId: string) => ["education", "modules", moduleId, "lessons"] as const,
+  educationModuleProgress: (moduleId: string) => ["education", "modules", moduleId, "progress"] as const,
 } as const;
 
 
