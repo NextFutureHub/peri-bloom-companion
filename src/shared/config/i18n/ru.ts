@@ -171,6 +171,9 @@ export const ru = {
     completed: "Завершено",
     notStarted: "Не начато",
     inProgress: "В процессе",
+    difficultyEasy: "Легко",
+    difficultyMedium: "Средне",
+    difficultyHard: "Сложно",
   },
   admin: {
     dashboard: {

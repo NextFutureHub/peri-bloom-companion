@@ -171,6 +171,9 @@ export const en = {
     completed: "Completed",
     notStarted: "Not started",
     inProgress: "In progress",
+    difficultyEasy: "Easy",
+    difficultyMedium: "Medium",
+    difficultyHard: "Hard",
   },
   admin: {
     dashboard: {

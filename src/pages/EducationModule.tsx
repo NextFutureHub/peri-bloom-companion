@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   useEducationModule,
@@ -59,10 +59,27 @@ const EducationModule = () => {
   const isLoading = moduleLoading || progressLoading;
   const hasError = moduleError || lessonsError;
 
+  // Сохраняем stage и ID модуля в sessionStorage для автоматического скролла при возврате
+  useEffect(() => {
+    if (module?.stage && moduleId) {
+      sessionStorage.setItem("education_last_stage", module.stage);
+      sessionStorage.setItem("education_last_module_id", moduleId);
+    }
+  }, [module?.stage, moduleId]);
+
   const handleRefetch = () => {
     refetchModule();
     refetchLessons();
     refetchProgress();
+  };
+
+  const handleBack = () => {
+    // Сохраняем stage и ID модуля перед возвратом для автоматического скролла
+    if (module?.stage && moduleId) {
+      sessionStorage.setItem("education_last_stage", module.stage);
+      sessionStorage.setItem("education_last_module_id", moduleId);
+    }
+    navigate("/education");
   };
 
   // Если нет moduleId, редиректим на страницу списка
@@ -76,10 +93,10 @@ const EducationModule = () => {
     return (
       <div className="min-h-screen p-4 sm:p-6">
         <div className="mx-auto flex max-w-4xl flex-col gap-4">
-          <Button variant="ghost" className="w-fit gap-2" onClick={() => navigate("/education")}>
-            <ArrowLeft className="h-4 w-4" />
-            Назад к модулям
-          </Button>
+        <Button variant="ghost" className="w-fit gap-2" onClick={handleBack}>
+          <ArrowLeft className="h-4 w-4" />
+          Назад к модулям
+        </Button>
           <Alert variant="destructive">
             <AlertTitle>Не удалось загрузить модуль</AlertTitle>
             <AlertDescription>
@@ -97,7 +114,7 @@ const EducationModule = () => {
   return (
     <div className="min-h-screen p-4 sm:p-6">
       <div className="mx-auto flex max-w-4xl flex-col gap-4">
-        <Button variant="ghost" className="w-fit gap-2" onClick={() => navigate(-1)}>
+        <Button variant="ghost" className="w-fit gap-2" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4" />
           Назад
         </Button>

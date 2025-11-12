@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "@/shared/hooks/useTranslation";
-import { Home, MessageCircle, FileText, Activity, BookOpen, Settings } from "lucide-react";
+import { Home, MessageCircle, FileText, BookOpen, Settings } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 export const Navigation = () => {
@@ -11,7 +11,6 @@ export const Navigation = () => {
     { path: "/dashboard", label: t("nav.dashboard"), icon: Home },
     { path: "/ai-chat", label: t("nav.aiChat"), icon: MessageCircle },
     { path: "/symptoms", label: t("nav.symptoms"), icon: FileText },
-    { path: "/iot", label: t("nav.iot"), icon: Activity },
     { path: "/education", label: t("nav.education"), icon: BookOpen },
     { path: "/settings", label: t("nav.settings"), icon: Settings },
   ];

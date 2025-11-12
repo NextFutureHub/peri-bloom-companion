@@ -171,6 +171,9 @@ export const kk = {
     completed: "Аяқталды",
     notStarted: "Басталмады",
     inProgress: "Жалғасуда",
+    difficultyEasy: "Оңай",
+    difficultyMedium: "Орташа",
+    difficultyHard: "Қиын",
   },
   admin: {
     dashboard: {
