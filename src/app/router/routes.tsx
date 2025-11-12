@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { lazy, ReactNode } from "react";
 import { Navigation } from "@/widgets/header";
-import { AuthGuard } from "@/shared/lib/guards";
+import { AuthGuard, AdminGuard } from "@/shared/lib/guards";
 import { ErrorBoundary } from "@/shared/lib/errorBoundary";
 import { useUserQuery } from "@/entities/user";
 import { tokenStorage } from "@/shared/api/client";
@@ -16,6 +16,12 @@ const EducationPage = lazy(() => import("@/pages/Education"));
 const EducationModulePage = lazy(() => import("@/pages/EducationModule"));
 const SettingsPage = lazy(() => import("@/pages/Settings"));
 const NotFoundPage = lazy(() => import("@/pages/NotFound"));
+
+// Admin pages
+const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
+const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboard"));
+const AdminUsersPage = lazy(() => import("@/pages/admin/AdminUsers"));
+const AdminEducationPage = lazy(() => import("@/pages/admin/AdminEducation"));
 
 // Layout с навигацией
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
@@ -159,6 +165,42 @@ export const router = createBrowserRouter([
           </AuthGuard>
         </ErrorBoundary>
       </AppLayout>
+    ),
+  },
+  {
+    path: "/admin",
+    element: (
+      <ErrorBoundary>
+        <AdminGuard>
+          <AdminLayout>
+            <AdminDashboardPage />
+          </AdminLayout>
+        </AdminGuard>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: "/admin/users",
+    element: (
+      <ErrorBoundary>
+        <AdminGuard>
+          <AdminLayout>
+            <AdminUsersPage />
+          </AdminLayout>
+        </AdminGuard>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: "/admin/education",
+    element: (
+      <ErrorBoundary>
+        <AdminGuard>
+          <AdminLayout>
+            <AdminEducationPage />
+          </AdminLayout>
+        </AdminGuard>
+      </ErrorBoundary>
     ),
   },
   {

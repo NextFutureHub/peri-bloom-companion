@@ -32,6 +32,17 @@ export const QUERY_KEYS = {
   educationModule: (id: string) => ["education", "modules", id] as const,
   educationModuleLessons: (moduleId: string) => ["education", "modules", moduleId, "lessons"] as const,
   educationModuleProgress: (moduleId: string) => ["education", "modules", moduleId, "progress"] as const,
+
+  // Admin queries
+  admin: {
+    dashboard: () => ["admin", "dashboard"] as const,
+    users: (page?: number, limit?: number, search?: string, role?: string) =>
+      ["admin", "users", page, limit, search, role] as const,
+    user: (id: string) => ["admin", "users", id] as const,
+    educationModules: (page?: number, limit?: number) =>
+      ["admin", "education", "modules", page, limit] as const,
+    educationModule: (id: string) => ["admin", "education", "modules", id] as const,
+  },
 } as const;
 
 
