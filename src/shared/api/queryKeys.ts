@@ -42,6 +42,8 @@ export const QUERY_KEYS = {
     educationModules: (page?: number, limit?: number) =>
       ["admin", "education", "modules", page, limit] as const,
     educationModule: (id: string) => ["admin", "education", "modules", id] as const,
+    moduleLessons: (moduleId: string) => ["admin", "education", "modules", moduleId, "lessons"] as const,
+    lesson: (id: string) => ["admin", "education", "lessons", id] as const,
   },
 } as const;
 

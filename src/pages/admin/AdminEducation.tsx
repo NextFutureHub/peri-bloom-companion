@@ -1,9 +1,21 @@
 import { useState, useEffect } from "react";
-import { useAdminEducationModules, useDeleteAdminEducationModule, useUpdateAdminEducationModule, useAdminEducationModule } from "@/features/admin";
+import { 
+  useAdminEducationModules, 
+  useDeleteAdminEducationModule, 
+  useUpdateAdminEducationModule, 
+  useAdminEducationModule,
+  useAdminModuleLessons,
+  useCreateAdminLesson,
+  useUpdateAdminLesson,
+  useDeleteAdminLesson,
+} from "@/features/admin";
+import type { CreateLessonDto } from "@/shared/api/admin.client";
+import type { LessonContentType } from "@/shared/types/api/education.dto";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { Button } from "@/shared/ui/atoms/button";
 import { Badge } from "@/shared/ui/atoms/badge";
 import { BookOpen, Plus, Trash2, Edit, ChevronLeft, ChevronRight } from "lucide-react";
+import ModuleCardWithLessons from "./ModuleCardWithLessons";
 import { Skeleton } from "@/shared/ui/atoms/skeleton";
 import { toast } from "sonner";
 import {
@@ -32,6 +44,9 @@ const AdminEducation = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [selectedModuleForLesson, setSelectedModuleForLesson] = useState<string | null>(null);
+  const [isCreateLessonDialogOpen, setIsCreateLessonDialogOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -46,6 +61,20 @@ const AdminEducation = () => {
     isPublished: "false",
     isFeatured: "false",
     order: "0",
+  });
+
+  const [lessonFormData, setLessonFormData] = useState({
+    title: "",
+    description: "",
+    contentType: "video" as LessonContentType,
+    order: "0",
+    durationMin: "",
+    videoUrl: "",
+    content: "",
+    transcript: "",
+    thumbnailUrl: "",
+    estimatedReadTime: "",
+    isPublished: "false",
   });
 
   // Загружаем данные модуля для редактирования
@@ -180,6 +209,82 @@ const AdminEducation = () => {
     setIsEditDialogOpen(false);
     setEditingModuleId(null);
     resetForm();
+  };
+
+  const toggleModuleExpanded = (moduleId: string) => {
+    setExpandedModules((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(moduleId)) {
+        newSet.delete(moduleId);
+      } else {
+        newSet.add(moduleId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleCreateLesson = (moduleId: string) => {
+    setSelectedModuleForLesson(moduleId);
+    setLessonFormData({
+      title: "",
+      description: "",
+      contentType: "video",
+      order: "0",
+      durationMin: "",
+      videoUrl: "",
+      content: "",
+      transcript: "",
+      thumbnailUrl: "",
+      estimatedReadTime: "",
+      isPublished: "false",
+    });
+    setIsCreateLessonDialogOpen(true);
+  };
+
+  const createLessonMutation = useCreateAdminLesson();
+  const updateLessonMutation = useUpdateAdminLesson();
+  const deleteLessonMutation = useDeleteAdminLesson();
+
+  const handleSubmitLesson = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedModuleForLesson || !lessonFormData.title || !lessonFormData.contentType) {
+      toast.error("Заполните все обязательные поля");
+      return;
+    }
+
+    try {
+      await createLessonMutation.mutateAsync({
+        moduleId: selectedModuleForLesson!,
+        title: lessonFormData.title,
+        description: lessonFormData.description || undefined,
+        contentType: lessonFormData.contentType,
+        order: parseInt(lessonFormData.order || "0"),
+        durationMin: lessonFormData.durationMin ? parseInt(lessonFormData.durationMin) : undefined,
+        videoUrl: lessonFormData.videoUrl || undefined,
+        content: lessonFormData.content || undefined,
+        transcript: lessonFormData.transcript || undefined,
+        thumbnailUrl: lessonFormData.thumbnailUrl || undefined,
+        estimatedReadTime: lessonFormData.estimatedReadTime ? parseInt(lessonFormData.estimatedReadTime) : undefined,
+        isPublished: lessonFormData.isPublished === "true",
+      });
+      toast.success("Урок успешно создан");
+      setIsCreateLessonDialogOpen(false);
+      setSelectedModuleForLesson(null);
+    } catch (error) {
+      toast.error("Ошибка при создании урока");
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: string) => {
+    if (confirm("Вы уверены, что хотите удалить этот урок?")) {
+      try {
+        await deleteLessonMutation.mutateAsync(lessonId);
+        toast.success("Урок успешно удалён");
+      } catch (error) {
+        toast.error("Ошибка при удалении урока");
+      }
+    }
   };
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;
@@ -541,6 +646,150 @@ const AdminEducation = () => {
               </form>
             </DialogContent>
           </Dialog>
+
+          {/* Диалог создания урока */}
+          <Dialog open={isCreateLessonDialogOpen} onOpenChange={setIsCreateLessonDialogOpen}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Создание нового урока</DialogTitle>
+                <DialogDescription>
+                  Заполните форму для создания урока в модуле
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmitLesson} className="space-y-4">
+                <div>
+                  <Label>Название урока *</Label>
+                  <Input
+                    value={lessonFormData.title}
+                    onChange={(e) => setLessonFormData({ ...lessonFormData, title: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Описание</Label>
+                  <Textarea
+                    value={lessonFormData.description}
+                    onChange={(e) => setLessonFormData({ ...lessonFormData, description: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Тип контента *</Label>
+                    <Select
+                      value={lessonFormData.contentType}
+                      onValueChange={(value) => setLessonFormData({ ...lessonFormData, contentType: value as LessonContentType })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="video">Видео</SelectItem>
+                        <SelectItem value="article">Статья</SelectItem>
+                        <SelectItem value="podcast">Подкаст</SelectItem>
+                        <SelectItem value="pdf">PDF</SelectItem>
+                        <SelectItem value="checklist">Чек-лист</SelectItem>
+                        <SelectItem value="interactive">Интерактивный</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Порядок *</Label>
+                    <Input
+                      type="number"
+                      value={lessonFormData.order}
+                      onChange={(e) => setLessonFormData({ ...lessonFormData, order: e.target.value })}
+                      min={0}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Длительность (минуты)</Label>
+                    <Input
+                      type="number"
+                      value={lessonFormData.durationMin}
+                      onChange={(e) => setLessonFormData({ ...lessonFormData, durationMin: e.target.value })}
+                      min={1}
+                    />
+                  </div>
+                  <div>
+                    <Label>Время чтения (минуты)</Label>
+                    <Input
+                      type="number"
+                      value={lessonFormData.estimatedReadTime}
+                      onChange={(e) => setLessonFormData({ ...lessonFormData, estimatedReadTime: e.target.value })}
+                      min={1}
+                    />
+                  </div>
+                </div>
+                {lessonFormData.contentType === "video" && (
+                  <div>
+                    <Label>URL видео</Label>
+                    <Input
+                      type="url"
+                      value={lessonFormData.videoUrl}
+                      onChange={(e) => setLessonFormData({ ...lessonFormData, videoUrl: e.target.value })}
+                      placeholder="https://..."
+                    />
+                  </div>
+                )}
+                {(lessonFormData.contentType === "article" || lessonFormData.contentType === "pdf") && (
+                  <div>
+                    <Label>Содержимое</Label>
+                    <Textarea
+                      value={lessonFormData.content}
+                      onChange={(e) => setLessonFormData({ ...lessonFormData, content: e.target.value })}
+                      rows={6}
+                    />
+                  </div>
+                )}
+                {lessonFormData.contentType === "video" && (
+                  <div>
+                    <Label>Транскрипт</Label>
+                    <Textarea
+                      value={lessonFormData.transcript}
+                      onChange={(e) => setLessonFormData({ ...lessonFormData, transcript: e.target.value })}
+                      rows={4}
+                    />
+                  </div>
+                )}
+                <div>
+                  <Label>URL превью изображения</Label>
+                  <Input
+                    type="url"
+                    value={lessonFormData.thumbnailUrl}
+                    onChange={(e) => setLessonFormData({ ...lessonFormData, thumbnailUrl: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+                <div>
+                  <Label>Опубликован</Label>
+                  <Select
+                    value={lessonFormData.isPublished}
+                    onValueChange={(value) => setLessonFormData({ ...lessonFormData, isPublished: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="false">Нет</SelectItem>
+                      <SelectItem value="true">Да</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsCreateLessonDialogOpen(false)}>
+                    Отмена
+                  </Button>
+                  <Button type="submit" disabled={createLessonMutation.isPending}>
+                    {createLessonMutation.isPending ? "Создание..." : "Создать"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Card className="shadow-soft">
@@ -565,52 +814,22 @@ const AdminEducation = () => {
             ) : (
               <>
                 <div className="space-y-4">
-                  {data.modules.map((module) => (
-                    <div
-                      key={module.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold">{module.title}</h3>
-                          <Badge variant={module.isPublished ? "default" : "secondary"}>
-                            {module.isPublished ? "Опубликован" : "Черновик"}
-                          </Badge>
-                          {module.isFeatured && (
-                            <Badge variant="outline">Рекомендуемый</Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                          {module.description}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Категория: {module.category}</span>
-                          <span>Сложность: {module.difficulty}</span>
-                          <span>Уроков: {module.lessonsCount}</span>
-                          <span>Прогресс: {module.progressCount}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleEdit(module.id)}
-                        >
-                          <Edit className="w-4 h-4 mr-2" />
-                          Редактировать
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDelete(module.id)}
-                          disabled={deleteMutation.isPending}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Удалить
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                  {data.modules.map((module) => {
+                    const isExpanded = expandedModules.has(module.id);
+                    return (
+                      <ModuleCardWithLessons
+                        key={module.id}
+                        module={module}
+                        isExpanded={isExpanded}
+                        onToggleExpand={() => toggleModuleExpanded(module.id)}
+                        onEdit={() => handleEdit(module.id)}
+                        onDelete={() => handleDelete(module.id)}
+                        onCreateLesson={() => handleCreateLesson(module.id)}
+                        onDeleteLesson={handleDeleteLesson}
+                        deleteMutationPending={deleteMutation.isPending}
+                      />
+                    );
+                  })}
                 </div>
 
                 {totalPages > 1 && (

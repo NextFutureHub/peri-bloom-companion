@@ -13,6 +13,12 @@ import {
   createAdminEducationModule,
   updateAdminEducationModule,
   deleteAdminEducationModule,
+  fetchAdminModuleLessons,
+  fetchAdminLessonById,
+  createAdminLesson,
+  updateAdminLesson,
+  deleteAdminLesson,
+  type CreateLessonDto,
 } from "@/shared/api/admin.client";
 import type {
   DashboardResponseDto,
@@ -25,6 +31,7 @@ import type {
   CreateEducationModuleDto,
   UpdateEducationModuleDto,
 } from "@/shared/types/api/admin.dto";
+import type { LessonDto } from "@/shared/types/api/education.dto";
 
 // Dashboard
 export const useAdminDashboard = () => {
@@ -173,6 +180,82 @@ export const useDeleteAdminEducationModule = () => {
           return query.queryKey[0] === "admin" && 
                  query.queryKey[1] === "education" && 
                  query.queryKey[2] === "modules";
+        }
+      });
+    },
+  });
+};
+
+// Lessons
+export const useAdminModuleLessons = (moduleId: string, includeUnpublished: boolean = true) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.admin.moduleLessons(moduleId),
+    queryFn: () => fetchAdminModuleLessons(moduleId, includeUnpublished),
+    enabled: !!moduleId,
+  });
+};
+
+export const useAdminLesson = (lessonId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.admin.lesson(lessonId),
+    queryFn: () => fetchAdminLessonById(lessonId),
+    enabled: !!lessonId,
+  });
+};
+
+export const useCreateAdminLesson = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createAdminLesson,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.admin.moduleLessons(variables.moduleId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.admin.educationModule(variables.moduleId),
+      });
+    },
+  });
+};
+
+export const useUpdateAdminLesson = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ lessonId, data }: { lessonId: string; data: Partial<CreateLessonDto> }) =>
+      updateAdminLesson(lessonId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.admin.lesson(variables.lessonId),
+      });
+      // Нужно получить moduleId из кеша или передать его
+      // Пока инвалидируем все уроки модулей
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          return query.queryKey[0] === "admin" && 
+                 query.queryKey[1] === "education" && 
+                 query.queryKey[2] === "modules" &&
+                 query.queryKey[4] === "lessons";
+        }
+      });
+    },
+  });
+};
+
+export const useDeleteAdminLesson = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteAdminLesson,
+    onSuccess: () => {
+      // Инвалидируем все запросы уроков модулей
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          return query.queryKey[0] === "admin" && 
+                 query.queryKey[1] === "education" && 
+                 query.queryKey[2] === "modules" &&
+                 query.queryKey[4] === "lessons";
         }
       });
     },

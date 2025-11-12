@@ -10,6 +10,22 @@ import type {
   CreateEducationModuleDto,
   UpdateEducationModuleDto,
 } from "@/shared/types/api/admin.dto";
+import type { LessonDto, LessonContentType } from "@/shared/types/api/education.dto";
+
+export interface CreateLessonDto {
+  moduleId: string;
+  title: string;
+  description?: string;
+  contentType: LessonContentType;
+  order: number;
+  durationMin?: number;
+  videoUrl?: string;
+  content?: string;
+  transcript?: string;
+  thumbnailUrl?: string;
+  estimatedReadTime?: number;
+  isPublished?: boolean;
+}
 
 /**
  * API клиент для админ-панели
@@ -115,5 +131,41 @@ export const updateAdminEducationModule = async (
 
 export const deleteAdminEducationModule = async (moduleId: string): Promise<void> => {
   await api.delete(`/admin/education/modules/${moduleId}`);
+};
+
+// Lessons
+export const fetchAdminModuleLessons = async (
+  moduleId: string,
+  includeUnpublished: boolean = true
+): Promise<LessonDto[]> => {
+  const params = new URLSearchParams();
+  if (includeUnpublished) params.append("includeUnpublished", "true");
+
+  const response = await api.get<LessonDto[]>(
+    `/admin/education/modules/${moduleId}/lessons?${params.toString()}`
+  );
+  return response.data;
+};
+
+export const fetchAdminLessonById = async (lessonId: string): Promise<LessonDto> => {
+  const response = await api.get<LessonDto>(`/admin/education/lessons/${lessonId}`);
+  return response.data;
+};
+
+export const createAdminLesson = async (data: CreateLessonDto): Promise<LessonDto> => {
+  const response = await api.post<LessonDto>("/admin/education/lessons", data);
+  return response.data;
+};
+
+export const updateAdminLesson = async (
+  lessonId: string,
+  data: Partial<CreateLessonDto>
+): Promise<LessonDto> => {
+  const response = await api.patch<LessonDto>(`/admin/education/lessons/${lessonId}`, data);
+  return response.data;
+};
+
+export const deleteAdminLesson = async (lessonId: string): Promise<void> => {
+  await api.delete(`/admin/education/lessons/${lessonId}`);
 };
 
