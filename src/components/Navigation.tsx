@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 import { Home, MessageCircle, FileText, Activity, BookOpen, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 

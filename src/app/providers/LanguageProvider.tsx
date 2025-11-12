@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useMemo } from "react";
 import type { Language } from "@/shared/types";
 
 interface LanguageContextType {
@@ -18,12 +18,17 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("peribloom_language", language);
   }, [language]);
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    language,
+    setLanguage,
+  }), [language, setLanguage]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

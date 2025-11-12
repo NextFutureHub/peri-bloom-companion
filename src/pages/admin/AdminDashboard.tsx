@@ -2,6 +2,7 @@ import { useAdminDashboard } from "@/features/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { Users, MessageCircle, Activity, BookOpen, AlertCircle, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/shared/ui/atoms/skeleton";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 
 const StatCard = ({
   title,
@@ -47,12 +48,13 @@ const StatCard = ({
 
 const AdminDashboard = () => {
   const { data, isLoading, error } = useAdminDashboard();
+  const { t } = useTranslation();
 
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <p className="text-destructive">Ошибка загрузки данных</p>
+          <p className="text-destructive">{t("admin.dashboard.errorLoading")}</p>
         </div>
       </div>
     );
@@ -64,63 +66,63 @@ const AdminDashboard = () => {
     <div className="min-h-[calc(100dvh-5rem)] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Панель администратора</h1>
+          <h1 className="text-3xl font-bold mb-2">{t("admin.dashboard.title")}</h1>
           <p className="text-muted-foreground">
-            Обзор активности платформы PeriBloom
+            {t("admin.dashboard.description")}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Всего пользователей"
+            title={t("admin.dashboard.totalUsers")}
             value={stats?.totalUsers ?? 0}
             icon={Users}
             isLoading={isLoading}
           />
           <StatCard
-            title="Новые регистрации"
+            title={t("admin.dashboard.newUsers")}
             value={stats?.newUsers ?? 0}
             icon={TrendingUp}
-            description="За последние 7 дней"
+            description={t("admin.dashboard.newUsersDescription")}
             isLoading={isLoading}
           />
           <StatCard
-            title="Активные пользователи"
+            title={t("admin.dashboard.activeUsers")}
             value={stats?.activeUsers ?? 0}
             icon={Activity}
-            description="За последние 30 дней"
+            description={t("admin.dashboard.activeUsersDescription")}
             isLoading={isLoading}
           />
           <StatCard
-            title="Активные AI-чаты"
+            title={t("admin.dashboard.activeChats")}
             value={stats?.activeChats ?? 0}
             icon={MessageCircle}
-            description="За последние 24 часа"
+            description={t("admin.dashboard.activeChatsDescription")}
             isLoading={isLoading}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Онлайн устройств"
+            title={t("admin.dashboard.onlineDevices")}
             value={stats?.onlineDevices ?? 0}
             icon={Activity}
             isLoading={isLoading}
           />
           <StatCard
-            title="Офлайн устройств"
+            title={t("admin.dashboard.offlineDevices")}
             value={stats?.offlineDevices ?? 0}
             icon={Activity}
             isLoading={isLoading}
           />
           <StatCard
-            title="Завершённых модулей"
+            title={t("admin.dashboard.completedModules")}
             value={stats?.completedModules ?? 0}
             icon={BookOpen}
             isLoading={isLoading}
           />
           <StatCard
-            title="Инциденты"
+            title={t("admin.dashboard.incidents")}
             value={stats?.incidents ?? 0}
             icon={AlertCircle}
             isLoading={isLoading}
@@ -131,7 +133,7 @@ const AdminDashboard = () => {
           <Card className="shadow-soft">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">
-                Данные обновлены: {new Date(data.generatedAt).toLocaleString("ru-RU")}
+                {t("admin.dashboard.dataUpdated")}: {new Date(data.generatedAt).toLocaleString()}
               </p>
             </CardContent>
           </Card>

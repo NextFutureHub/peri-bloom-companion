@@ -1,5 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { useTranslation } from "@/shared/hooks/useTranslation";
+import { useLanguage } from "@/app/providers/LanguageProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { Label } from "@/shared/ui/atoms/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/atoms/select";
@@ -11,7 +12,8 @@ import { useLogout } from "@/features/auth";
 import { useUserQuery } from "@/entities/user";
 
 const Settings = () => {
-  const { profile, language, setLanguage, resetProfile } = useApp();
+  const { profile, resetProfile } = useApp();
+  const { language, setLanguage } = useLanguage();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const logoutMutation = useLogout();
@@ -39,21 +41,21 @@ const Settings = () => {
   const displayStage = getStageLabel(apiProfile?.lifeStage || profile.lifeStage);
 
   const handleReset = () => {
-    if (confirm("Вы уверены, что хотите сбросить все данные?")) {
+    if (confirm(t("settings.resetConfirm"))) {
       resetProfile();
-      toast.success("Данные сброшены");
+      toast.success(t("settings.resetSuccess"));
       navigate("/");
     }
   };
 
   const handleLogout = () => {
-    if (confirm("Вы уверены, что хотите выйти из аккаунта?")) {
+    if (confirm(t("settings.logoutConfirm"))) {
       logoutMutation.mutate(undefined, {
         onSuccess: () => {
-          toast.success("Вы успешно вышли из аккаунта");
+          toast.success(t("settings.logoutSuccess"));
         },
         onError: (error: unknown) => {
-          const message = error instanceof Error ? error.message : "Ошибка при выходе";
+          const message = error instanceof Error ? error.message : t("settings.logoutError");
           toast.error(message);
         },
       });
@@ -81,8 +83,9 @@ const Settings = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ru">Русский</SelectItem>
-                  <SelectItem value="kk">Қазақша</SelectItem>
+                  <SelectItem value="ru">{t("settings.languageRu")}</SelectItem>
+                  <SelectItem value="kk">{t("settings.languageKk")}</SelectItem>
+                  <SelectItem value="en">{t("settings.languageEn")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -91,12 +94,12 @@ const Settings = () => {
               <h3 className="font-semibold">{t("settings.profile")}</h3>
               <div className="space-y-2 text-sm">
                 <p>
-                  <span className="text-muted-foreground">Имя:</span>{" "}
-                  {isUserLoading ? "Загрузка..." : displayName}
+                  <span className="text-muted-foreground">{t("settings.name")}:</span>{" "}
+                  {isUserLoading ? t("common.loading") : displayName}
                 </p>
                 <p>
-                  <span className="text-muted-foreground">Этап:</span>{" "}
-                  {isUserLoading ? "Загрузка..." : displayStage}
+                  <span className="text-muted-foreground">{t("settings.stage")}:</span>{" "}
+                  {isUserLoading ? t("common.loading") : displayStage}
                 </p>
               </div>
             </div>
@@ -108,7 +111,7 @@ const Settings = () => {
                 disabled={logoutMutation.isPending}
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                {logoutMutation.isPending ? "Выход..." : "Выйти из аккаунта"}
+                {logoutMutation.isPending ? t("settings.loggingOut") : t("settings.logoutButton")}
               </GradientButton>
               
               <SoftButton

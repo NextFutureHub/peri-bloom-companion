@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 export type LifeStage = "pregnant" | "postpartum" | "childcare" | null;
-export type Language = "ru" | "kk";
 
 interface UserProfile {
   name: string;
@@ -14,8 +13,6 @@ interface UserProfile {
 interface AppContextType {
   profile: UserProfile;
   updateProfile: (updates: Partial<UserProfile>) => void;
-  language: Language;
-  setLanguage: (lang: Language) => void;
   resetProfile: () => void;
 }
 
@@ -33,18 +30,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return stored ? JSON.parse(stored) : defaultProfile;
   });
 
-  const [language, setLanguage] = useState<Language>(() => {
-    const stored = localStorage.getItem("peribloom_language");
-    return (stored as Language) || "ru";
-  });
-
   useEffect(() => {
     localStorage.setItem("peribloom_profile", JSON.stringify(profile));
   }, [profile]);
-
-  useEffect(() => {
-    localStorage.setItem("peribloom_language", language);
-  }, [language]);
 
   const updateProfile = (updates: Partial<UserProfile>) => {
     setProfile((prev) => ({ ...prev, ...updates }));
@@ -57,7 +45,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AppContext.Provider
-      value={{ profile, updateProfile, language, setLanguage, resetProfile }}
+      value={{ profile, updateProfile, resetProfile }}
     >
       {children}
     </AppContext.Provider>

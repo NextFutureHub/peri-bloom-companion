@@ -54,18 +54,18 @@ const Symptoms = () => {
     try {
       await createMutation.mutateAsync(data);
       setIsDialogOpen(false);
-      toast.success("Симптом успешно добавлен");
+      toast.success(t("symptoms.successAdd"));
     } catch (error) {
-      toast.error("Ошибка при добавлении симптома");
+      toast.error(t("symptoms.errorAdd"));
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteMutation.mutateAsync(id);
-      toast.success("Симптом удалён");
+      toast.success(t("symptoms.successDelete"));
     } catch (error) {
-      toast.error("Ошибка при удалении симптома");
+      toast.error(t("symptoms.errorDelete"));
     }
   };
 
@@ -82,21 +82,21 @@ const Symptoms = () => {
   };
 
   const getTriageLabel = (level: TriageLevel | null | undefined) => {
-    if (!level) return "Анализ выполняется...";
+    if (!level) return t("symptoms.triageAnalyzing");
     switch (level) {
       case "low":
-        return "Низкий риск";
+        return t("symptoms.triageLow");
       case "medium":
-        return "Средний риск";
+        return t("symptoms.triageMedium");
       case "high":
-        return "Высокий риск";
+        return t("symptoms.triageHigh");
     }
   };
 
   const categoryLabels: Record<SymptomCategory, string> = {
-    physical: "Физический",
-    emotional: "Эмоциональный",
-    cognitive: "Когнитивный",
+    physical: t("symptoms.categoryPhysical"),
+    emotional: t("symptoms.categoryEmotional"),
+    cognitive: t("symptoms.categoryCognitive"),
   };
 
   return (
@@ -107,22 +107,22 @@ const Symptoms = () => {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-6 h-6 text-primary" />
-                {t("symptoms.title") || "Симптомы"}
+                {t("symptoms.title")}
               </CardTitle>
               <CardDescription>
-                Отслеживайте своё состояние и получайте персонализированные рекомендации
+                {t("symptoms.description")}
               </CardDescription>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <GradientButton size="sm">
                   <Plus className="w-4 h-4 mr-2" />
-                  {t("symptoms.addSymptom") || "Добавить симптом"}
+                  {t("symptoms.addSymptom")}
                 </GradientButton>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{t("symptoms.addSymptom") || "Добавить симптом"}</DialogTitle>
+                  <DialogTitle>{t("symptoms.addSymptom")}</DialogTitle>
                 </DialogHeader>
                 <SymptomForm
                   onSubmit={handleCreate}
@@ -139,7 +139,7 @@ const Symptoms = () => {
           <CardContent className="p-4">
             <div className="flex flex-wrap gap-4 items-end">
               <div className="flex-1 min-w-[200px]">
-                <Label>Категория</Label>
+                <Label>{t("symptoms.category")}</Label>
                 <Select
                   value={selectedCategory || "all"}
                   onValueChange={(value) =>
@@ -150,15 +150,15 @@ const Symptoms = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Все категории</SelectItem>
-                    <SelectItem value="physical">Физический</SelectItem>
-                    <SelectItem value="emotional">Эмоциональный</SelectItem>
-                    <SelectItem value="cognitive">Когнитивный</SelectItem>
+                    <SelectItem value="all">{t("symptoms.allCategories")}</SelectItem>
+                    <SelectItem value="physical">{t("symptoms.categoryPhysical")}</SelectItem>
+                    <SelectItem value="emotional">{t("symptoms.categoryEmotional")}</SelectItem>
+                    <SelectItem value="cognitive">{t("symptoms.categoryCognitive")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex-1 min-w-[200px]">
-                <Label>Дата начала</Label>
+                <Label>{t("symptoms.startDate")}</Label>
                 <Input
                   type="date"
                   value={dateFilter.start || ""}
@@ -168,7 +168,7 @@ const Symptoms = () => {
                 />
               </div>
               <div className="flex-1 min-w-[200px]">
-                <Label>Дата окончания</Label>
+                <Label>{t("symptoms.endDate")}</Label>
                 <Input
                   type="date"
                   value={dateFilter.end || ""}
@@ -186,7 +186,7 @@ const Symptoms = () => {
                   variant="outline"
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Сбросить
+                  {t("symptoms.reset")}
                 </SoftButton>
               )}
             </div>
@@ -196,22 +196,22 @@ const Symptoms = () => {
         {/* Контент с табами */}
         <Tabs defaultValue="list" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="list">Список</TabsTrigger>
-            <TabsTrigger value="chart">Графики</TabsTrigger>
+            <TabsTrigger value="list">{t("symptoms.list")}</TabsTrigger>
+            <TabsTrigger value="chart">{t("symptoms.charts")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="list" className="space-y-4">
             {isLoading ? (
               <Card className="shadow-soft">
                 <CardContent className="p-12 text-center text-muted-foreground">
-                  Загрузка...
+                  {t("symptoms.loading")}
                 </CardContent>
               </Card>
             ) : filteredSymptoms.length === 0 ? (
               <Card className="shadow-soft">
                 <CardContent className="p-12 text-center text-muted-foreground">
-                  <p>Нет записей симптомов</p>
-                  <p className="text-sm mt-2">Добавьте первый симптом, чтобы начать отслеживание</p>
+                  <p>{t("symptoms.noEntries")}</p>
+                  <p className="text-sm mt-2">{t("symptoms.addFirstSymptom")}</p>
                 </CardContent>
               </Card>
             ) : (

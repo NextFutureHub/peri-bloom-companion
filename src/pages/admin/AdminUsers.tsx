@@ -18,8 +18,10 @@ import {
   DialogTrigger,
 } from "@/shared/ui/atoms/dialog";
 import type { UserRole } from "@/shared/types/api/admin.dto";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 
 const AdminUsers = () => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -36,12 +38,12 @@ const AdminUsers = () => {
   const updateRoleMutation = useUpdateAdminUserRole();
 
   const handleDelete = async (userId: string) => {
-    if (confirm("Вы уверены, что хотите удалить этого пользователя?")) {
+    if (confirm(t("admin.users.deleteConfirm"))) {
       try {
         await deleteMutation.mutateAsync(userId);
-        toast.success("Пользователь успешно удалён");
+        toast.success(t("admin.users.deleteSuccess"));
       } catch (error) {
-        toast.error("Ошибка при удалении пользователя");
+        toast.error(t("admin.users.deleteError"));
       }
     }
   };
@@ -49,9 +51,9 @@ const AdminUsers = () => {
   const handleRoleChange = async (userId: string, newRole: UserRole) => {
     try {
       await updateRoleMutation.mutateAsync({ userId, data: { role: newRole } });
-      toast.success("Роль успешно изменена");
+      toast.success(t("admin.users.roleChangeSuccess"));
     } catch (error) {
-      toast.error("Ошибка при изменении роли");
+      toast.error(t("admin.users.roleChangeError"));
     }
   };
 
@@ -76,14 +78,14 @@ const AdminUsers = () => {
         <div>
           <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
             <Users className="w-8 h-8" />
-            Управление пользователями
+            {t("admin.users.title")}
           </h1>
-          <p className="text-muted-foreground">Просмотр и управление пользователями платформы</p>
+          <p className="text-muted-foreground">{t("admin.users.description")}</p>
         </div>
 
         <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle>Фильтры и поиск</CardTitle>
+            <CardTitle>{t("admin.users.filters")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex gap-4 flex-wrap">
@@ -91,7 +93,7 @@ const AdminUsers = () => {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
-                    placeholder="Поиск по email или имени..."
+                    placeholder={t("admin.users.searchPlaceholder")}
                     value={search}
                     onChange={(e) => {
                       setSearch(e.target.value);
@@ -107,14 +109,14 @@ const AdminUsers = () => {
                   setPage(1);
                 }}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Все роли" />
+                    <SelectValue placeholder={t("admin.users.allRoles")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Все роли</SelectItem>
-                    <SelectItem value="user">Пользователь</SelectItem>
-                    <SelectItem value="expert">Эксперт</SelectItem>
-                    <SelectItem value="admin">Администратор</SelectItem>
-                    <SelectItem value="super_admin">Супер-админ</SelectItem>
+                    <SelectItem value="all">{t("admin.users.allRoles")}</SelectItem>
+                    <SelectItem value="user">{t("admin.users.user")}</SelectItem>
+                    <SelectItem value="expert">{t("admin.users.expert")}</SelectItem>
+                    <SelectItem value="admin">{t("admin.users.admin")}</SelectItem>
+                    <SelectItem value="super_admin">{t("admin.users.superAdmin")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -137,11 +139,11 @@ const AdminUsers = () => {
               </div>
             ) : error ? (
               <div className="text-center py-12 text-destructive">
-                Ошибка загрузки пользователей
+                {t("admin.users.errorLoading")}
               </div>
             ) : !data || data.users.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                Пользователи не найдены
+                {t("admin.users.noUsers")}
               </div>
             ) : (
               <>
@@ -172,14 +174,14 @@ const AdminUsers = () => {
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm">
                               <Edit className="w-4 h-4 mr-2" />
-                              Изменить роль
+                              {t("admin.users.changeRole")}
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle>Изменение роли пользователя</DialogTitle>
+                              <DialogTitle>{t("admin.users.changeRole")}</DialogTitle>
                               <DialogDescription>
-                                Выберите новую роль для {user.email}
+                                {t("admin.users.selectRoleFor")} {user.email}
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 py-4">
@@ -193,10 +195,10 @@ const AdminUsers = () => {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="user">Пользователь</SelectItem>
-                                  <SelectItem value="expert">Эксперт</SelectItem>
-                                  <SelectItem value="admin">Администратор</SelectItem>
-                                  <SelectItem value="super_admin">Супер-админ</SelectItem>
+                                  <SelectItem value="user">{t("admin.users.user")}</SelectItem>
+                                  <SelectItem value="expert">{t("admin.users.expert")}</SelectItem>
+                                  <SelectItem value="admin">{t("admin.users.admin")}</SelectItem>
+                                  <SelectItem value="super_admin">{t("admin.users.superAdmin")}</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -209,7 +211,7 @@ const AdminUsers = () => {
                           disabled={deleteMutation.isPending}
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
-                          Удалить
+                          {t("admin.users.delete")}
                         </Button>
                       </div>
                     </div>
@@ -219,7 +221,7 @@ const AdminUsers = () => {
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-6">
                     <p className="text-sm text-muted-foreground">
-                      Страница {page} из {totalPages}
+                      {t("admin.users.page")} {page} {t("admin.users.of")} {totalPages}
                     </p>
                     <div className="flex gap-2">
                       <Button
@@ -229,7 +231,7 @@ const AdminUsers = () => {
                         disabled={page === 1}
                       >
                         <ChevronLeft className="w-4 h-4" />
-                        Назад
+                        {t("admin.users.previous")}
                       </Button>
                       <Button
                         variant="outline"
@@ -237,7 +239,7 @@ const AdminUsers = () => {
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
                       >
-                        Вперёд
+                        {t("admin.users.next")}
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>

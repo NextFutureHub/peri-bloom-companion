@@ -4,6 +4,7 @@ import { LayoutDashboard, Users, BookOpen, LogOut, Settings } from "lucide-react
 import { cn } from "@/lib/utils";
 import { tokenStorage } from "@/shared/api/client";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -12,11 +13,12 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const navItems = [
-    { path: "/admin", label: "Дашборд", icon: LayoutDashboard },
-    { path: "/admin/users", label: "Пользователи", icon: Users },
-    { path: "/admin/education", label: "Образование", icon: BookOpen },
+    { path: "/admin", label: t("admin.layout.dashboard"), icon: LayoutDashboard },
+    { path: "/admin/users", label: t("admin.layout.users"), icon: Users },
+    { path: "/admin/education", label: t("admin.layout.education"), icon: BookOpen },
   ];
 
   const handleLogout = () => {
@@ -30,8 +32,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       <aside className="fixed left-0 top-0 h-full w-64 bg-card border-r shadow-soft z-50">
         <div className="flex flex-col h-full">
           <div className="p-6 border-b">
-            <h1 className="text-2xl font-bold text-primary">PeriBloom</h1>
-            <p className="text-sm text-muted-foreground">Админ-панель</p>
+            <h1 className="text-2xl font-bold text-primary">{t("admin.layout.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("admin.layout.subtitle")}</p>
           </div>
           <nav className="flex-1 p-4 space-y-2">
             {navItems.map((item) => {
@@ -59,14 +61,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
               <Settings className="w-5 h-5" />
-              <span className="font-medium">Настройки</span>
+              <span className="font-medium">{t("admin.layout.settings")}</span>
             </Link>
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
               <LogOut className="w-5 h-5" />
-              <span className="font-medium">Выйти</span>
+              <span className="font-medium">{t("admin.layout.logout")}</span>
             </button>
           </div>
         </div>

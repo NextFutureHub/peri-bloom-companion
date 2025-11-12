@@ -15,7 +15,7 @@ const Dashboard = () => {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="mt-4 text-muted-foreground">Загрузка...</p>
+          <p className="mt-4 text-muted-foreground">{t("dashboard.loading")}</p>
         </div>
       </div>
     );
@@ -24,13 +24,13 @@ const Dashboard = () => {
   if (!user?.profile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Профиль не найден</p>
+        <p className="text-muted-foreground">{t("dashboard.profileNotFound")}</p>
       </div>
     );
   }
 
   const profile = user.profile;
-  const userName = profile.name || "Пользователь";
+  const userName = profile.name || t("dashboard.user");
 
   // Получаем недели беременности из API или рассчитываем
   const getWeeksPregnant = (): number => {
@@ -80,21 +80,21 @@ const Dashboard = () => {
   const quickActions = [
     {
       title: t("dashboard.aiAssistant"),
-      description: "Задайте вопрос AI",
+      description: t("dashboard.aiDescription"),
       icon: MessageCircle,
       path: "/ai-chat",
       gradient: "gradient-primary",
     },
     {
       title: t("dashboard.symptomJournal"),
-      description: "Отслеживайте симптомы",
+      description: t("dashboard.symptomsDescription"),
       icon: FileText,
       path: "/symptoms",
       gradient: "gradient-peachy",
     },
     {
       title: t("dashboard.education"),
-      description: "Обучающие материалы",
+      description: t("dashboard.educationDescription"),
       icon: BookOpen,
       path: "/education",
       gradient: "gradient-warm",
@@ -110,7 +110,7 @@ const Dashboard = () => {
               <Heart className="w-10 h-10 text-white" />
             </div>
             <CardTitle className="text-4xl">
-              Здравствуйте, {userName}! 💗
+              {t("dashboard.greeting")}, {userName}! 💗
             </CardTitle>
             <CardDescription className="text-lg mt-2">
               {profile.lifeStage === "pregnancy" && (
@@ -151,7 +151,7 @@ const Dashboard = () => {
                     <h3 className="font-semibold text-lg">{action.title}</h3>
                     <p className="text-sm text-muted-foreground mt-1">{action.description}</p>
                   </div>
-                  <GradientButton className="w-full">Открыть</GradientButton>
+                  <GradientButton className="w-full">{t("dashboard.open")}</GradientButton>
                 </CardContent>
               </Card>
             ))}
