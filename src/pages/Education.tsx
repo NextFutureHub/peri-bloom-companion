@@ -1,5 +1,6 @@
 import { useMemo, useRef, useEffect } from "react";
 import { useEducationModules } from "@/entities/education";
+import { useUserQuery } from "@/entities/user";
 import { useTranslation } from "@/shared/hooks/useTranslation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { BookOpen, Lock, Clock, Layers } from "lucide-react";
@@ -19,8 +20,12 @@ const formatDuration = (minutes?: number | null) => {
 
 const Education = () => {
   const { data, isLoading, isError, refetch, isRefetching } = useEducationModules();
+  const { data: userData } = useUserQuery("profile");
   const { t } = useTranslation();
   const modules = useMemo(() => data ?? [], [data]);
+  
+  // Получаем текущий этап пользователя
+  const userLifeStage = userData?.profile?.lifeStage;
 
   // Группируем модули по этапам
   const groupedModules = useMemo(() => {
@@ -70,7 +75,19 @@ const Education = () => {
     }
   };
 
-  const stageOrder: EducationStage[] = ["pregnancy", "postpartum", "childcare", "all"];
+  // Определяем порядок блоков: текущий этап пользователя первым
+  const stageOrder = useMemo(() => {
+    const defaultOrder: EducationStage[] = ["pregnancy", "postpartum", "childcare", "all"];
+    
+    // Если у пользователя есть этап, ставим его первым
+    if (userLifeStage && (userLifeStage === "pregnancy" || userLifeStage === "postpartum" || userLifeStage === "childcare")) {
+      const userStage = userLifeStage as EducationStage;
+      const otherStages = defaultOrder.filter((stage) => stage !== userStage && stage !== "all");
+      return [userStage, ...otherStages, "all"];
+    }
+    
+    return defaultOrder;
+  }, [userLifeStage]);
 
   // Refs для горизонтальных контейнеров скролла и карточек модулей
   const scrollContainerRefs = useRef<Record<EducationStage, HTMLDivElement | null>>({
