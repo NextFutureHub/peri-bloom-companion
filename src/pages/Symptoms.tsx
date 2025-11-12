@@ -100,7 +100,7 @@ const Symptoms = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
+    <div className="min-h-[calc(100dvh-5rem)] p-4 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <Card className="shadow-soft">
           <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">

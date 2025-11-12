@@ -119,7 +119,7 @@ const IoTMonitor = () => {
   };
 
   return (
-    <div className="relative min-h-screen p-6">
+    <div className="relative min-h-[calc(100dvh-5rem)] p-6">
       {/* Hint overlay - z-40 чтобы навигация (z-50) была поверх */}
       <div className="fixed inset-0 z-40 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />

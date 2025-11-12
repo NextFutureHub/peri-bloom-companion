@@ -38,7 +38,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-[calc(100dvh-5rem)] p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <Card className="shadow-soft">
           <CardHeader>

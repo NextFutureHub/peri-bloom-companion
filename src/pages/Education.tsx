@@ -21,7 +21,7 @@ const Education = () => {
   const modules = useMemo(() => data ?? [], [data]);
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
+    <div className="min-h-[calc(100dvh-5rem)] p-4 sm:p-6">
       <div className="mx-auto max-w-5xl space-y-6">
         <Card className="shadow-soft">
           <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
