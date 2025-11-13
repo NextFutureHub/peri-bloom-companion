@@ -26,6 +26,13 @@ export interface BloomState {
   pulse: number; // 0-1 controls breathing animation
   shimmer: number; // 0-1 controls secondary animation
   companionVisible: boolean;
+  metrics: BloomMetrics;
+}
+
+export interface BloomMetrics {
+  balanceScore: number;
+  careScore: number;
+  logCount: number;
 }
 
 export interface BloomEngineInput {
@@ -92,8 +99,22 @@ const calculateTrimester = (profile?: UserProfileDto | null): 1 | 2 | 3 => {
   return 1;
 };
 
-const mapLifeStageToGrowthStage = (profile?: UserProfileDto): BloomGrowthStage => {
+const mapLifeStageToGrowthStage = (
+  profile?: UserProfileDto,
+  balanceScore?: number,
+  concerningSymptomsRatio?: number,
+): BloomGrowthStage => {
   if (!profile) return "seed";
+
+  // Если много тревожных симптомов (низкий баланс), переходим в renewal независимо от стадии
+  if (balanceScore !== undefined && balanceScore < 0.35) {
+    return "renewal";
+  }
+
+  // Если более 40% симптомов тревожные, тоже renewal
+  if (concerningSymptomsRatio !== undefined && concerningSymptomsRatio >= 0.4) {
+    return "renewal";
+  }
 
   if (profile.lifeStage === "pregnancy") {
     const trimester = calculateTrimester(profile);
@@ -107,13 +128,17 @@ const mapLifeStageToGrowthStage = (profile?: UserProfileDto): BloomGrowthStage =
   }
 
   if (profile.lifeStage === "childcare") {
-    return "companions";
+    // Companions только если баланс хороший
+    if (balanceScore !== undefined && balanceScore >= 0.5) {
+      return "companions";
+    }
+    return "renewal";
   }
 
   return "seed";
 };
 
-const calculateSymptomMetrics = (symptoms: SymptomDto[]) => {
+const calculateSymptomMetrics = (symptoms: SymptomDto[]): BloomMetrics => {
   if (!symptoms.length) {
     return {
       balanceScore: 0.8,
@@ -134,8 +159,18 @@ const calculateSymptomMetrics = (symptoms: SymptomDto[]) => {
   const averageIntensity = intensityValues.reduce((acc, val) => acc + val, 0) / intensityValues.length;
   const normalizedIntensity = clamp((averageIntensity - 1) / 4); // 0 (минимум) - 1 (максимум)
 
-  const balanceScore = clamp(1 - normalizedIntensity); // чем ниже интенсивность, тем выше баланс
-  const careScore = clamp(Math.log10(recent.length + 1) / Math.log10(6)); // 0..1, логирование симптомов = забота
+  // Подсчитываем тревожные симптомы (high triage или высокая интенсивность)
+  const concerningSymptoms = recent.filter(
+    (item) => item.triageLevel === "high" || (item.intensity ?? 0) >= 4
+  ).length;
+  const concerningRatio = recent.length > 0 ? concerningSymptoms / recent.length : 0;
+
+  // Баланс снижается при высокой интенсивности И при большом количестве тревожных симптомов
+  const balanceScore = clamp(1 - normalizedIntensity - concerningRatio * 0.3);
+
+  // Забота учитывает регулярность логирования, но снижается при большом количестве плохих симптомов
+  const baseCareScore = clamp(Math.log10(recent.length + 1) / Math.log10(6));
+  const careScore = clamp(baseCareScore - concerningRatio * 0.2); // Плохие симптомы уменьшают заботу
 
   return {
     balanceScore,
@@ -162,8 +197,12 @@ const calculateNarrative = (
     mood = "resting";
   }
 
-  const petalsBase = 5 + Math.round(careScore * 4);
-  const petals = clamp(petalsBase, 5, 12);
+  // Лепестки зависят от заботы, но уменьшаются при низком балансе (плохие симптомы)
+  // База: 3-7 лепестков в зависимости от заботы
+  // Но если баланс низкий (много плохих симптомов), лепестки уменьшаются
+  const petalsBase = 3 + Math.round(careScore * 4);
+  const balancePenalty = balanceScore < 0.4 ? Math.round((0.4 - balanceScore) * 3) : 0; // Штраф до -3 лепестков
+  const petals = clamp(petalsBase - balancePenalty, 3, 12);
 
   const storyCue: BloomNarrative["storyCue"] = (() => {
     if (mood === "radiant") return "glow";
@@ -181,10 +220,28 @@ const calculateNarrative = (
 };
 
 export const calculateBloomState = (input: BloomEngineInput): BloomState => {
-  const growthStage = mapLifeStageToGrowthStage(input.profile);
+  const symptomMetrics = calculateSymptomMetrics(input.symptoms);
+
+  // Подсчитываем долю тревожных симптомов для определения стадии
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const recent = input.symptoms.filter((item) => {
+    const date = new Date(item.startDate).getTime();
+    return !Number.isNaN(date) && date >= sevenDaysAgo.getTime();
+  });
+  const concerningSymptoms = recent.filter(
+    (item) => item.triageLevel === "high" || (item.intensity ?? 0) >= 4
+  ).length;
+  const concerningRatio = recent.length > 0 ? concerningSymptoms / recent.length : 0;
+
+  // Стадия зависит от симптомов (может перейти в renewal при плохих симптомах)
+  const growthStage = mapLifeStageToGrowthStage(
+    input.profile,
+    symptomMetrics.balanceScore,
+    concerningRatio,
+  );
   const palette = STAGE_PALETTES[growthStage];
 
-  const symptomMetrics = calculateSymptomMetrics(input.symptoms);
   const narrative = calculateNarrative(
     symptomMetrics.balanceScore,
     symptomMetrics.careScore,
@@ -202,5 +259,6 @@ export const calculateBloomState = (input: BloomEngineInput): BloomState => {
     pulse,
     shimmer,
     companionVisible: growthStage === "companions",
+    metrics: symptomMetrics,
   };
 };

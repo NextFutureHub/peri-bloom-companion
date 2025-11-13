@@ -7,13 +7,22 @@ export const useTranslation = () => {
 
   const translate = useMemo(() => {
     const t = translations[language];
-    return (key: string): string => {
+    return (key: string, params?: Record<string, string | number>): string => {
       const keys = key.split(".");
       let value: any = t;
       for (const k of keys) {
         value = value?.[k];
       }
-      return value || key;
+      let result = value || key;
+      
+      // Интерполяция параметров: заменяем {param} на значения
+      if (params && typeof result === "string") {
+        Object.entries(params).forEach(([paramKey, paramValue]) => {
+          result = result.replace(new RegExp(`\\{${paramKey}\\}`, "g"), String(paramValue));
+        });
+      }
+      
+      return result;
     };
   }, [language]);
 

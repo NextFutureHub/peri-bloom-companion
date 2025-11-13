@@ -102,6 +102,21 @@ export const en = {
       rise: "Today the bloom unfurls new petals — honour yourself with a small ritual of care.",
       restore: "The bloom slows down. Take a gentle pause to return to harmony.",
       glow: "The petals shimmer. Capture a joyful moment — even the tiniest one.",
+      startChat: "Discuss with AI",
+    },
+    achievements: {
+      title: "Achievement Petals",
+      completed: "Completed",
+      inProgress: "In Progress",
+      completedBadge: "Earned",
+      empty: "No achievements yet. Keep taking care of yourself!",
+    },
+    history: {
+      title: "Bloom history",
+      empty: "Your emotional bloom timeline will appear here soon.",
+      petals: "petals",
+      companion: "baby bloom",
+      harmony: "Harmony {harmony}% · Care {care}%",
     },
   },
   aiChat: {

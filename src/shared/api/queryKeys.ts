@@ -45,6 +45,14 @@ export const QUERY_KEYS = {
     moduleLessons: (moduleId: string) => ["admin", "education", "modules", moduleId, "lessons"] as const,
     lesson: (id: string) => ["admin", "education", "lessons", id] as const,
   },
+
+  // Bloom queries
+  bloom: {
+    history: (userId?: string, page?: number, pageSize?: number) =>
+      ["bloom", "history", userId ?? "me", page ?? 1, pageSize ?? 3] as const,
+    insight: (userId?: string) => ["bloom", "insight", userId ?? "me"] as const,
+    achievements: (userId?: string) => ["bloom", "achievements", userId ?? "me"] as const,
+  },
 } as const;
 
 

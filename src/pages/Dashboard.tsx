@@ -4,7 +4,7 @@ import { GradientButton } from "@/shared/ui/atoms/button-variants";
 import { MessageCircle, BookOpen, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserQuery } from "@/entities/user";
-import { EmotionalBloom } from "@/features/emotional-bloom";
+import { EmotionalBloom, BloomHistoryTimeline } from "@/features/emotional-bloom";
 
 const Dashboard = () => {
   const { data: user, isLoading } = useUserQuery("profile");
@@ -132,6 +132,8 @@ const Dashboard = () => {
             </CardDescription>
           </CardHeader>
         </Card>
+
+        <BloomHistoryTimeline className="mt-8" pageSize={3} />
 
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-6">{t("dashboard.quickActions")}</h2>
