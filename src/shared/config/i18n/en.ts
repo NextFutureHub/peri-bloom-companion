@@ -60,6 +60,50 @@ export const en = {
     educationDescription: "Educational materials",
     open: "Open",
   },
+  bloom: {
+    title: "Emotional Bloom",
+    stages: {
+      seed: {
+        label: "Emerging Seed",
+        description: "The flower awakens and gathers strength. Offer yourself gentle care.",
+      },
+      emerging: {
+        label: "Opening Bud",
+        description: "Petals begin to unfurl, inviting light, warmth, and confidence.",
+      },
+      bloom: {
+        label: "Full Bloom",
+        description: "The flower glows and breathes with you, filling the moment with anticipation.",
+      },
+      renewal: {
+        label: "Sharing Seeds",
+        description: "Petals fall softly while new shoots appear — a tender renewal.",
+      },
+      companions: {
+        label: "Mother & Baby Blossoms",
+        description: "Two flowers grow together, connected by light and care.",
+      },
+    },
+    moods: {
+      radiant: {
+        label: "Radiance",
+        message: "Your rhythm is harmonious — the bloom emits a warm, gentle glow.",
+      },
+      balanced: {
+        label: "Balance",
+        message: "You move at your own pace while the bloom supports steady growth.",
+      },
+      resting: {
+        label: "Rest",
+        message: "The bloom closes softly, inviting you to restore your energy.",
+      },
+    },
+    story: {
+      rise: "Today the bloom unfurls new petals — honour yourself with a small ritual of care.",
+      restore: "The bloom slows down. Take a gentle pause to return to harmony.",
+      glow: "The petals shimmer. Capture a joyful moment — even the tiniest one.",
+    },
+  },
   aiChat: {
     title: "AI Assistant",
     placeholder: "Ask me about your well-being...",

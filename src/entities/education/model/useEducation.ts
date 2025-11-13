@@ -1,4 +1,4 @@
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/shared/api/queryKeys";
 import {
   fetchEducationModules,
@@ -13,9 +13,11 @@ import type {
   EducationModuleProgressDto,
 } from "@/shared/types/api/education.dto";
 
+type QueryOptions<TData> = Omit<UseQueryOptions<TData, Error>, "queryKey" | "queryFn">;
+
 export const useEducationModules = (
   filters?: EducationModuleFilters,
-  options?: UseQueryOptions<EducationModuleDto[], Error>,
+  options?: QueryOptions<EducationModuleDto[]>,
 ) => {
   return useQuery<EducationModuleDto[], Error>({
     queryKey: QUERY_KEYS.educationModules(filters),
@@ -26,7 +28,7 @@ export const useEducationModules = (
 
 export const useEducationModule = (
   id: string,
-  options?: UseQueryOptions<EducationModuleDto, Error>,
+  options?: QueryOptions<EducationModuleDto>,
 ) => {
   return useQuery<EducationModuleDto, Error>({
     queryKey: QUERY_KEYS.educationModule(id),
@@ -45,7 +47,7 @@ export const useEducationModule = (
 
 export const useEducationModuleLessons = (
   moduleId: string,
-  options?: UseQueryOptions<LessonDto[], Error>,
+  options?: QueryOptions<LessonDto[]>,
 ) => {
   return useQuery<LessonDto[], Error>({
     queryKey: QUERY_KEYS.educationModuleLessons(moduleId),
@@ -57,7 +59,7 @@ export const useEducationModuleLessons = (
 
 export const useEducationModuleProgress = (
   moduleId: string,
-  options?: UseQueryOptions<EducationModuleProgressDto, Error>,
+  options?: QueryOptions<EducationModuleProgressDto>,
 ) => {
   return useQuery<EducationModuleProgressDto, Error>({
     queryKey: QUERY_KEYS.educationModuleProgress(moduleId),

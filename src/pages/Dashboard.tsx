@@ -1,9 +1,10 @@
 import { useTranslation } from "@/shared/hooks/useTranslation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { GradientButton } from "@/shared/ui/atoms/button-variants";
-import { MessageCircle, BookOpen, FileText, Heart } from "lucide-react";
+import { MessageCircle, BookOpen, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserQuery } from "@/entities/user";
+import { EmotionalBloom } from "@/features/emotional-bloom";
 
 const Dashboard = () => {
   const { data: user, isLoading } = useUserQuery("profile");
@@ -106,8 +107,8 @@ const Dashboard = () => {
       <div className="max-w-6xl mx-auto">
         <Card className="shadow-soft animate-float">
           <CardHeader className="text-center pb-8">
-            <div className="mx-auto mb-4 w-20 h-20 rounded-full gradient-primary flex items-center justify-center shadow-glow animate-pulse-soft">
-              <Heart className="w-10 h-10 text-white" />
+            <div className="mx-auto mb-6">
+              <EmotionalBloom />
             </div>
             <CardTitle className="text-4xl">
               {t("dashboard.greeting")}, {userName}! 💗
