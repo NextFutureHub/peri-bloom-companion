@@ -185,6 +185,11 @@ export const kk = {
   settings: {
     title: "Баптаулар",
     profile: "Профиль",
+    navigation: {
+      title: "Навигация",
+      description: "Навигация панелін баптаңыз, бөлімдерді қосыңыз немесе алып тастаңыз",
+      customize: "Навигацияны баптау",
+    },
     language: "Тіл",
     notifications: "Хабарландырулар",
     privacy: "Құпиялылық",
@@ -210,6 +215,21 @@ export const kk = {
     iot: "IoT",
     education: "Білім беру",
     settings: "Баптаулар",
+  },
+  navigation: {
+    customize: "Баптау",
+    editor: {
+      title: "Навигацияны баптау",
+      description: "Навигация панелінен бөлімдерді қосыңыз немесе алып тастаңыз",
+      active: "Белсенді бөлімдер",
+      hidden: "Жасырын бөлімдер",
+      reset: "Қалпына келтіру",
+    },
+    aiRecommended: "AI ұсынады",
+    aiSuggestion: "💡 Перлиден кеңес",
+    aiSuggestionDescription: "Кейбір бөлімдер сіздің белсенділігіңізге сүйене отырып ұсынылған",
+    saveSuccess: "Навигация жаңартылды",
+    saveError: "Сақтау кезінде қате",
   },
   education: {
     title: "Білім беру модульдері",

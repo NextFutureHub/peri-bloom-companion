@@ -53,6 +53,12 @@ export const QUERY_KEYS = {
     insight: (userId?: string) => ["bloom", "insight", userId ?? "me"] as const,
     achievements: (userId?: string) => ["bloom", "achievements", userId ?? "me"] as const,
   },
+
+  // Navigation queries
+  navigation: {
+    config: (userId?: string) => ["navigation", "config", userId ?? "me"] as const,
+    recommendations: (userId?: string) => ["navigation", "recommendations", userId ?? "me"] as const,
+  },
 } as const;
 
 

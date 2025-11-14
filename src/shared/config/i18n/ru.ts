@@ -185,6 +185,11 @@ export const ru = {
   settings: {
     title: "Настройки",
     profile: "Профиль",
+    navigation: {
+      title: "Навигация",
+      description: "Настройте панель навигации, добавьте или уберите разделы",
+      customize: "Настроить навигацию",
+    },
     language: "Язык",
     notifications: "Уведомления",
     privacy: "Приватность",
@@ -349,6 +354,21 @@ export const ru = {
       settings: "Настройки",
       logout: "Выйти",
     },
+  },
+  navigation: {
+    customize: "Настроить",
+    editor: {
+      title: "Настройка навигации",
+      description: "Добавьте или уберите разделы из панели навигации",
+      active: "Активные разделы",
+      hidden: "Скрытые разделы",
+      reset: "Сбросить",
+    },
+    aiRecommended: "Рекомендует AI",
+    aiSuggestion: "💡 Совет от Перли",
+    aiSuggestionDescription: "Некоторые разделы рекомендованы на основе вашей активности",
+    saveSuccess: "Навигация обновлена",
+    saveError: "Ошибка при сохранении",
   },
   common: {
     loading: "Загрузка...",

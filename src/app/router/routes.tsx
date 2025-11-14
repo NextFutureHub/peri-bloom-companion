@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { lazy, ReactNode } from "react";
-import { Navigation } from "@/widgets/header";
+import { AdaptiveNavigation } from "@/features/navigation/ui/AdaptiveNavigation";
 import { AuthGuard, AdminGuard } from "@/shared/lib/guards";
 import { ErrorBoundary } from "@/shared/lib/errorBoundary";
 import { useUserQuery } from "@/entities/user";
@@ -39,7 +39,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className={onboardingComplete ? "pb-20 md:pb-0 md:pt-20" : ""}>
-      {onboardingComplete && <Navigation />}
+      {onboardingComplete && <AdaptiveNavigation />}
       {children}
     </div>
   );

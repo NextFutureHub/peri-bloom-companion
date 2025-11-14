@@ -3,8 +3,20 @@ import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from "ax
 /**
  * Конфигурация API клиента
  */
+const getApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) {
+    return "http://localhost:3000";
+  }
+  // Если URL не начинается с http:// или https://, добавляем https://
+  if (!envUrl.startsWith("http://") && !envUrl.startsWith("https://")) {
+    return `https://${envUrl}`;
+  }
+  return envUrl;
+};
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  baseURL: getApiUrl(),
   withCredentials: false,
   headers: {
     "Content-Type": "application/json",

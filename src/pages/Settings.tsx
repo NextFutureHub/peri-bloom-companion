@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card
 import { Label } from "@/shared/ui/atoms/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/atoms/select";
 import { SoftButton, GradientButton } from "@/shared/ui/atoms/button-variants";
-import { Settings as SettingsIcon, Globe, Trash2, LogOut } from "lucide-react";
-import { toast } from "sonner";
+import { Settings as SettingsIcon, Globe, Trash2, LogOut, Navigation } from "lucide-react";
+import { toast } from "@/shared/ui/atoms/sonner";
 import { useNavigate } from "react-router-dom";
 import { useLogout } from "@/features/auth";
 import { useUserQuery } from "@/entities/user";
+import { NavigationEditor } from "@/features/navigation";
+import { useState } from "react";
 
 const Settings = () => {
   const { profile, resetProfile } = useApp();
@@ -18,6 +20,7 @@ const Settings = () => {
   const navigate = useNavigate();
   const logoutMutation = useLogout();
   const { data: userData, isLoading: isUserLoading } = useUserQuery("profile");
+  const [isNavigationEditorOpen, setIsNavigationEditorOpen] = useState(false);
 
   const apiProfile = userData?.profile;
 
@@ -105,6 +108,18 @@ const Settings = () => {
             </div>
 
             <div className="pt-6 border-t space-y-3">
+              <h3 className="font-semibold">{t("settings.navigation.title")}</h3>
+              <p className="text-sm text-muted-foreground">{t("settings.navigation.description")}</p>
+              <GradientButton
+                onClick={() => setIsNavigationEditorOpen(true)}
+                className="w-full"
+              >
+                <Navigation className="w-4 h-4 mr-2" />
+                {t("settings.navigation.customize")}
+              </GradientButton>
+            </div>
+
+            <div className="pt-6 border-t space-y-3">
               <GradientButton
                 onClick={handleLogout}
                 className="w-full"
@@ -125,6 +140,13 @@ const Settings = () => {
           </CardContent>
         </Card>
       </div>
+
+      {isNavigationEditorOpen && (
+        <NavigationEditor
+          open={isNavigationEditorOpen}
+          onClose={() => setIsNavigationEditorOpen(false)}
+        />
+      )}
     </div>
   );
 };

@@ -185,6 +185,11 @@ export const en = {
   settings: {
     title: "Settings",
     profile: "Profile",
+    navigation: {
+      title: "Navigation",
+      description: "Customize the navigation panel, add or remove sections",
+      customize: "Customize Navigation",
+    },
     language: "Language",
     notifications: "Notifications",
     privacy: "Privacy",
@@ -210,6 +215,21 @@ export const en = {
     iot: "IoT",
     education: "Education",
     settings: "Settings",
+  },
+  navigation: {
+    customize: "Customize",
+    editor: {
+      title: "Navigation Settings",
+      description: "Add or remove sections from the navigation panel",
+      active: "Active Sections",
+      hidden: "Hidden Sections",
+      reset: "Reset",
+    },
+    aiRecommended: "AI Recommended",
+    aiSuggestion: "💡 Tip from Peri",
+    aiSuggestionDescription: "Some sections are recommended based on your activity",
+    saveSuccess: "Navigation updated",
+    saveError: "Error saving",
   },
   education: {
     title: "Educational Modules",
