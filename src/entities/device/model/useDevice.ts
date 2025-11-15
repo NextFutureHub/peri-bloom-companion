@@ -25,8 +25,3 @@ export const useDeviceMetricsQuery = (deviceId: string) => {
   });
 };
 
-
-
-
-
-

@@ -17,7 +17,3 @@ export interface DeviceMetricsDto {
 }
 
 
-
-
-
-
