@@ -1,19 +1,15 @@
 import { memo, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Plus } from "lucide-react";
 import { useNavigationConfig } from "../model/useNavigation";
 import { getIcon } from "../lib/iconMap";
+import { getNavTranslationKey } from "../lib/navTranslation";
 import { cn } from "@/shared/lib/utils";
 import { useTranslation } from "@/shared/hooks/useTranslation";
-import { Button } from "@/shared/ui/atoms/button";
-import { NavigationEditor } from "./NavigationEditor";
-import { useState } from "react";
 
 export const AdaptiveNavigation = memo(() => {
   const location = useLocation();
   const { t } = useTranslation();
   const { data: config, isLoading } = useNavigationConfig();
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const visibleItems = useMemo(() => {
     if (!config?.items) return [];
@@ -31,6 +27,7 @@ export const AdaptiveNavigation = memo(() => {
           {visibleItems.map((item) => {
             const Icon = getIcon(item.icon);
             const isActive = location.pathname === item.route || location.pathname.startsWith(item.route + "/");
+            const translatedLabel = t(getNavTranslationKey(item));
             
             return (
               <Link
@@ -44,33 +41,15 @@ export const AdaptiveNavigation = memo(() => {
                 )}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-xs md:text-sm font-medium">{item.label}</span>
+                <span className="text-xs md:text-sm font-medium">{translatedLabel}</span>
                 {item.aiRecommended && (
                   <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
                 )}
               </Link>
             );
           })}
-          
-          {/* Кнопка для открытия редактора */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex flex-col md:flex-row items-center gap-1 md:gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-primary"
-            onClick={() => setIsEditorOpen(true)}
-          >
-            <Plus className="w-5 h-5" />
-            <span className="text-xs md:text-sm font-medium">{t("navigation.customize")}</span>
-          </Button>
         </div>
       </nav>
-
-      {isEditorOpen && (
-        <NavigationEditor
-          open={isEditorOpen}
-          onClose={() => setIsEditorOpen(false)}
-        />
-      )}
     </>
   );
 });

@@ -8,9 +8,9 @@ import { Switch } from "@/shared/ui/atoms/switch";
 import { Label } from "@/shared/ui/atoms/label";
 import { useNavigationConfig, useUpdateNavigationConfig, useNavigationRecommendations } from "../model/useNavigation";
 import { getIcon } from "../lib/iconMap";
+import { getNavTranslationKey } from "../lib/navTranslation";
 import { cn } from "@/shared/lib/utils";
 import { Sparkles, X, GripVertical } from "lucide-react";
-import type { NavigationItem } from "@/shared/types/api/navigation.dto";
 import { toast } from "@/shared/ui/atoms/sonner";
 
 interface NavigationEditorProps {
@@ -98,13 +98,14 @@ export const NavigationEditor = memo(({ open, onClose }: NavigationEditorProps) 
               <div className="space-y-2">
                 {visibleItems.map((item) => {
                   const Icon = getIcon(item.icon);
+                  const translatedLabel = t(getNavTranslationKey(item));
                   return (
                     <Card key={item.id} className="p-3">
                       <CardContent className="p-0 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <GripVertical className="w-4 h-4 text-muted-foreground cursor-move" />
                           <Icon className="w-5 h-5 text-primary" />
-                          <span className="font-medium">{item.label}</span>
+                          <span className="font-medium">{translatedLabel}</span>
                           {item.aiRecommended && (
                             <Badge variant="outline" className="text-xs">
                               <Sparkles className="w-3 h-3 mr-1" />
@@ -132,12 +133,13 @@ export const NavigationEditor = memo(({ open, onClose }: NavigationEditorProps) 
                 <div className="space-y-2">
                   {hiddenItems.map((item) => {
                     const Icon = getIcon(item.icon);
+                    const translatedLabel = t(getNavTranslationKey(item));
                     return (
                       <Card key={item.id} className={cn("p-3", item.aiRecommended ? "border-primary/20 bg-primary/5" : "opacity-60")}>
                         <CardContent className="p-0 flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <Icon className="w-5 h-5 text-muted-foreground" />
-                            <span className="text-muted-foreground">{item.label}</span>
+                            <span className="text-muted-foreground">{translatedLabel}</span>
                             {item.aiRecommended && (
                               <Badge variant="outline" className="text-xs">
                                 <Sparkles className="w-3 h-3 mr-1" />
