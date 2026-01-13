@@ -1,8 +1,11 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { useThemeManager } from "@/shared/hooks/use-theme-manager";
 
-// Временная заглушка, так как next-themes может не быть установлен
-// TODO: Установить next-themes если нужна поддержка тем
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+  // Используем хук для управления темой
+  // Статус можно передать позже, когда будет доступен
+  useThemeManager();
+
   return <>{children}</>;
 };
 

@@ -71,6 +71,60 @@ export interface UpdateUserRoleDto {
   role: UserRole;
 }
 
+// Status types
+export type TriageStatus = "SAFE" | "ATTENTION" | "RISK" | "CRITICAL";
+export type ActionType = "primary" | "secondary" | "link";
+export type ReasonSeverity = "low" | "medium" | "high";
+export type DataQuality = "high" | "medium" | "low";
+export type StatusChange = "up" | "down" | "same";
+
+export interface StatusReasonEvidenceDto {
+  field: string;
+  value: string;
+  window?: string;
+}
+
+export interface StatusReasonDto {
+  code: string;
+  label: string;
+  severity: ReasonSeverity;
+  evidence: StatusReasonEvidenceDto[];
+  rank: number;
+}
+
+export interface StatusActionDto {
+  id: string;
+  label: string;
+  type: ActionType;
+  route?: string;
+  deeplink?: string;
+  requiresPaywall?: boolean;
+  analyticsEvent: string;
+  priority: number;
+}
+
+export interface StatusResponseDto {
+  status: TriageStatus;
+  harmonyScoreStatus: TriageStatus;
+  symptomCriticalityStatus: TriageStatus;
+  trendDeteriorationStatus: TriageStatus;
+  manualOverrideStatus: TriageStatus | null;
+  reasons: StatusReasonDto[];
+  nextBestActions: StatusActionDto[];
+  dataQuality: DataQuality;
+  missingSignals?: string[];
+  timeWindowLabel: string;
+  statusChange?: StatusChange;
+  changeReasons?: StatusReasonDto[];
+  timestamp: string;
+}
+
+export interface UpdateUserStatusDto {
+  manualStatus?: TriageStatus;
+  criticalFlags?: string[];
+  overrideNote?: string;
+}
+
 // Education
 export interface EducationModuleListItemDto {
   id: string;

@@ -5,6 +5,8 @@ import type {
   UserDetailResponseDto,
   UpdateUserDto,
   UpdateUserRoleDto,
+  UpdateUserStatusDto,
+  StatusResponseDto,
   EducationModuleListResponseDto,
   EducationModuleDetailResponseDto,
   CreateEducationModuleDto,
@@ -81,6 +83,19 @@ export const deleteAdminUser = async (userId: string): Promise<void> => {
 
 export const restoreAdminUser = async (userId: string): Promise<UserDetailResponseDto> => {
   const response = await api.post<UserDetailResponseDto>(`/admin/users/${userId}/restore`);
+  return response.data;
+};
+
+export const fetchAdminUserStatus = async (userId: string): Promise<StatusResponseDto> => {
+  const response = await api.get<StatusResponseDto>(`/admin/users/${userId}/status`);
+  return response.data;
+};
+
+export const updateAdminUserStatus = async (
+  userId: string,
+  data: UpdateUserStatusDto
+): Promise<StatusResponseDto> => {
+  const response = await api.patch<StatusResponseDto>(`/admin/users/${userId}/status`, data);
   return response.data;
 };
 

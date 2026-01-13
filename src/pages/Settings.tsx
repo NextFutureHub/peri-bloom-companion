@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card
 import { Label } from "@/shared/ui/atoms/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/atoms/select";
 import { SoftButton, GradientButton } from "@/shared/ui/atoms/button-variants";
-import { Settings as SettingsIcon, Globe, Trash2, LogOut, Navigation } from "lucide-react";
+import { Settings as SettingsIcon, Globe, Trash2, LogOut, Navigation, Moon, Sun, Monitor } from "lucide-react";
 import { toast } from "@/shared/ui/atoms/sonner";
 import { useNavigate } from "react-router-dom";
 import { useLogout } from "@/features/auth";
 import { useUserQuery } from "@/entities/user";
 import { NavigationEditor } from "@/features/navigation";
 import { useState } from "react";
+import { useThemeManager, type ThemeMode } from "@/shared/hooks/use-theme-manager";
 
 const Settings = () => {
   const { profile, resetProfile } = useApp();
@@ -21,6 +22,7 @@ const Settings = () => {
   const logoutMutation = useLogout();
   const { data: userData, isLoading: isUserLoading } = useUserQuery("profile");
   const [isNavigationEditorOpen, setIsNavigationEditorOpen] = useState(false);
+  const { themeMode, updateThemeMode } = useThemeManager();
 
   const apiProfile = userData?.profile;
 
@@ -91,6 +93,46 @@ const Settings = () => {
                   <SelectItem value="en">{t("settings.languageEn")}</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="pt-6 border-t space-y-3">
+              <Label className="flex items-center gap-2">
+                <Monitor className="w-4 h-4" />
+                Тема
+              </Label>
+              <Select
+                value={themeMode}
+                onValueChange={(value: ThemeMode) => updateThemeMode(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">
+                    <span className="flex items-center gap-2">
+                      <Monitor className="w-4 h-4" />
+                      Авто (по состоянию и времени)
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="light">
+                    <span className="flex items-center gap-2">
+                      <Sun className="w-4 h-4" />
+                      Светлая
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="dark">
+                    <span className="flex items-center gap-2">
+                      <Moon className="w-4 h-4" />
+                      Тёмная
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {themeMode === "auto" && (
+                <p className="text-xs text-muted-foreground">
+                  Автоматически переключается на основе статуса и времени суток
+                </p>
+              )}
             </div>
 
             <div className="pt-6 border-t space-y-3">

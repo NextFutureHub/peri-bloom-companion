@@ -39,6 +39,27 @@ All colors MUST be HSL.
 
     --radius: 1rem;
 
+    /* Status colors - only for triage, not for UI */
+    --status-safe-base: 160 40% 45%;
+    --status-safe-bg: 160 40% 95%;
+    --status-safe-border: 160 35% 80%;
+    --status-safe-text: 160 40% 25%;
+
+    --status-attention-base: 35 85% 55%;
+    --status-attention-bg: 35 85% 95%;
+    --status-attention-border: 35 70% 80%;
+    --status-attention-text: 35 60% 30%;
+
+    --status-risk-base: 5 75% 55%;
+    --status-risk-bg: 5 75% 95%;
+    --status-risk-border: 5 65% 80%;
+    --status-risk-text: 5 55% 30%;
+
+    --status-critical-base: 355 70% 45%;
+    --status-critical-bg: 355 70% 95%;
+    --status-critical-border: 355 60% 78%;
+    --status-critical-text: 355 60% 28%;
+
     --gradient-primary: linear-gradient(135deg, hsl(345 75% 65%), hsl(345 85% 75%));
     --gradient-warm: linear-gradient(180deg, hsl(25 55% 97%), hsl(345 55% 95%));
     --gradient-peachy: linear-gradient(135deg, hsl(25 90% 70%), hsl(15 85% 68%));
@@ -78,6 +99,27 @@ All colors MUST be HSL.
     --border: 340 25% 20%;
     --input: 340 25% 20%;
     --ring: 345 70% 60%;
+
+    /* Status colors - dark theme */
+    --status-safe-base: 160 35% 55%;
+    --status-safe-bg: 160 25% 12%;
+    --status-safe-border: 160 25% 20%;
+    --status-safe-text: 160 30% 85%;
+
+    --status-attention-base: 35 70% 60%;
+    --status-attention-bg: 35 30% 13%;
+    --status-attention-border: 35 30% 22%;
+    --status-attention-text: 35 45% 85%;
+
+    --status-risk-base: 5 70% 60%;
+    --status-risk-bg: 5 30% 13%;
+    --status-risk-border: 5 30% 22%;
+    --status-risk-text: 5 45% 85%;
+
+    --status-critical-base: 355 65% 55%;
+    --status-critical-bg: 355 25% 12%;
+    --status-critical-border: 355 25% 20%;
+    --status-critical-text: 355 45% 88%;
 
     --gradient-primary: linear-gradient(135deg, hsl(345 70% 60%), hsl(345 80% 70%));
     --gradient-warm: linear-gradient(180deg, hsl(340 35% 8%), hsl(345 30% 12%));

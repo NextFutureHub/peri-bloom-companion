@@ -8,6 +8,8 @@ import {
   updateAdminUserRole,
   deleteAdminUser,
   restoreAdminUser,
+  fetchAdminUserStatus,
+  updateAdminUserStatus,
   fetchAdminEducationModules,
   fetchAdminEducationModuleById,
   createAdminEducationModule,
@@ -26,6 +28,8 @@ import type {
   UserDetailResponseDto,
   UpdateUserDto,
   UpdateUserRoleDto,
+  UpdateUserStatusDto,
+  StatusResponseDto,
   EducationModuleListResponseDto,
   EducationModuleDetailResponseDto,
   CreateEducationModuleDto,
@@ -108,6 +112,27 @@ export const useRestoreAdminUser = () => {
     onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.admin.users() });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.admin.user(userId) });
+    },
+  });
+};
+
+export const useAdminUserStatus = (userId: string, options?: { enabled?: boolean }) => {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.admin.user(userId), 'status'],
+    queryFn: () => fetchAdminUserStatus(userId),
+    enabled: options?.enabled !== undefined ? options.enabled : !!userId,
+  });
+};
+
+export const useUpdateAdminUserStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, data }: { userId: string; data: UpdateUserStatusDto }) =>
+      updateAdminUserStatus(userId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.admin.user(variables.userId), 'status'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.admin.users() });
     },
   });
 };
