@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, BookOpen, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, LogOut, Settings, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tokenStorage } from "@/shared/api/client";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const navItems = [
     { path: "/admin", label: t("admin.layout.dashboard"), icon: LayoutDashboard },
+    { path: "/admin/analytics", label: t("admin.layout.analytics"), icon: BarChart3 },
     { path: "/admin/users", label: t("admin.layout.users"), icon: Users },
     { path: "/admin/education", label: t("admin.layout.education"), icon: BookOpen },
   ];

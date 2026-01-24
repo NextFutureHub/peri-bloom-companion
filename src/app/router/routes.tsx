@@ -20,6 +20,7 @@ const NotFoundPage = lazy(() => import("@/pages/NotFound"));
 // Admin pages
 const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
 const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboard"));
+const AdminAnalyticsPage = lazy(() => import("@/pages/admin/AdminAnalytics"));
 const AdminUsersPage = lazy(() => import("@/pages/admin/AdminUsers"));
 const AdminEducationPage = lazy(() => import("@/pages/admin/AdminEducation"));
 
@@ -174,6 +175,18 @@ export const router = createBrowserRouter([
         <AdminGuard>
           <AdminLayout>
             <AdminDashboardPage />
+          </AdminLayout>
+        </AdminGuard>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: "/admin/analytics",
+    element: (
+      <ErrorBoundary>
+        <AdminGuard>
+          <AdminLayout>
+            <AdminAnalyticsPage />
           </AdminLayout>
         </AdminGuard>
       </ErrorBoundary>

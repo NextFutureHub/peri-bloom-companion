@@ -1,7 +1,9 @@
 import { useAdminDashboard } from "@/features/admin";
+import { useKeyMetrics, useNorthStarMetric } from "@/features/admin/model/useAnalytics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
-import { Users, MessageCircle, Activity, BookOpen, AlertCircle, TrendingUp } from "lucide-react";
+import { Users, MessageCircle, Activity, BookOpen, AlertCircle, TrendingUp, Target, Star } from "lucide-react";
 import { Skeleton } from "@/shared/ui/atoms/skeleton";
+import { Badge } from "@/shared/ui/atoms/badge";
 import { useTranslation } from "@/shared/hooks/useTranslation";
 
 const StatCard = ({
@@ -48,6 +50,8 @@ const StatCard = ({
 
 const AdminDashboard = () => {
   const { data, isLoading, error } = useAdminDashboard();
+  const { data: keyMetrics, isLoading: analyticsLoading } = useKeyMetrics();
+  const { northStarMetric, isLoading: northStarLoading } = useNorthStarMetric();
   const { t } = useTranslation();
 
   if (error) {
@@ -127,6 +131,72 @@ const AdminDashboard = () => {
             icon={AlertCircle}
             isLoading={isLoading}
           />
+        </div>
+
+        {/* North Star Metric - главная метрика аналитики */}
+        <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-soft">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-blue-600" />
+              North Star Metric
+              <Badge variant="outline" className="ml-2">Главная метрика</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {northStarLoading ? (
+              <Skeleton className="h-12 w-24" />
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {Math.round((northStarMetric || 0) * 100)}%
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Пользователи с ≥2 Core Actions за 7 дней
+                  </p>
+                </div>
+                <Star className="h-8 w-8 text-blue-500" />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Ключевые аналитические метрики */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            Продуктовая аналитика
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              title="Activation Rate"
+              value={keyMetrics?.activationRate ? `${Math.round(keyMetrics.activationRate * 100)}%` : '0%'}
+              icon={TrendingUp}
+              description="Доля активировавшихся пользователей"
+              isLoading={analyticsLoading}
+            />
+            <StatCard
+              title="Day 1 Retention"
+              value={keyMetrics?.day1Retention ? `${Math.round(keyMetrics.day1Retention * 100)}%` : '0%'}
+              icon={Users}
+              description="Возвращаются на следующий день"
+              isLoading={analyticsLoading}
+            />
+            <StatCard
+              title="Day 7 Retention"
+              value={keyMetrics?.day7Retention ? `${Math.round(keyMetrics.day7Retention * 100)}%` : '0%'}
+              icon={Users}
+              description="Возвращаются через неделю"
+              isLoading={analyticsLoading}
+            />
+            <StatCard
+              title="Core Actions/User"
+              value={keyMetrics?.coreActionFrequency?.toFixed(1) || '0.0'}
+              icon={Target}
+              description="Среднее число Core Actions"
+              isLoading={analyticsLoading}
+            />
+          </div>
         </div>
 
         {data?.generatedAt && (
