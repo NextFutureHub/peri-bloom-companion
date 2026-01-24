@@ -52,6 +52,7 @@ export const QUERY_KEYS = {
       ["bloom", "history", userId ?? "me", page ?? 1, pageSize ?? 3] as const,
     insight: (userId?: string) => ["bloom", "insight", userId ?? "me"] as const,
     achievements: (userId?: string) => ["bloom", "achievements", userId ?? "me"] as const,
+    status: (userId?: string) => ["bloom", "status", userId ?? "me"] as const,
   },
 
   // Navigation queries

@@ -64,6 +64,9 @@ export const useCreateSymptom = () => {
     mutationFn: (payload: CreateSymptomDto) => createSymptom(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.symptoms() });
+      // Важно: статус Bloom зависит от симптомов, поэтому обновляем его сразу
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.bloom.status() });
+      queryClient.refetchQueries({ queryKey: QUERY_KEYS.bloom.status(), type: "active" });
     },
   });
 };
@@ -80,6 +83,9 @@ export const useUpdateSymptom = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.symptoms() });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.symptom(data.id) });
+      // Важно: статус Bloom зависит от симптомов, поэтому обновляем его сразу
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.bloom.status() });
+      queryClient.refetchQueries({ queryKey: QUERY_KEYS.bloom.status(), type: "active" });
     },
   });
 };
@@ -95,6 +101,9 @@ export const useDeleteSymptom = () => {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.symptoms() });
       queryClient.removeQueries({ queryKey: QUERY_KEYS.symptom(id) });
+      // Важно: статус Bloom зависит от симптомов, поэтому обновляем его сразу
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.bloom.status() });
+      queryClient.refetchQueries({ queryKey: QUERY_KEYS.bloom.status(), type: "active" });
     },
   });
 };

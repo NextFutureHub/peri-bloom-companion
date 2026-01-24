@@ -98,8 +98,37 @@ export const useDeleteAdminUser = () => {
 
   return useMutation({
     mutationFn: deleteAdminUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.admin.users() });
+    onSuccess: (deletedUser, deletedUserId) => {
+      // Инвалидируем все запросы пользователей с любыми параметрами
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return query.queryKey[0] === "admin" && query.queryKey[1] === "users";
+        }
+      });
+      
+      // Принудительно обновляем все активные запросы пользователей
+      queryClient.refetchQueries({ 
+        predicate: (query) => {
+          return query.queryKey[0] === "admin" && 
+                 query.queryKey[1] === "users" && 
+                 query.state.status === "success";
+        },
+        type: "active"
+      });
+
+      // Удаляем из кеша конкретного пользователя
+      queryClient.removeQueries({ 
+        queryKey: QUERY_KEYS.admin.user(deletedUserId) 
+      });
+      
+      // Также инвалидируем статус пользователя
+      queryClient.removeQueries({ 
+        predicate: (query) => {
+          return query.queryKey[0] === "admin" && 
+                 query.queryKey[1] === "users" && 
+                 query.queryKey[2] === deletedUserId;
+        }
+      });
     },
   });
 };

@@ -53,6 +53,14 @@ const Settings = () => {
     }
   };
 
+  const handleDeleteAllData = () => {
+    if (confirm(t("settings.deleteAllDataConfirm"))) {
+      resetProfile();
+      toast.success(t("settings.deleteAllDataSuccess"));
+      navigate("/");
+    }
+  };
+
   const handleLogout = () => {
     if (confirm(t("settings.logoutConfirm"))) {
       logoutMutation.mutate(undefined, {
@@ -170,13 +178,22 @@ const Settings = () => {
                 <LogOut className="w-4 h-4 mr-2" />
                 {logoutMutation.isPending ? t("settings.loggingOut") : t("settings.logoutButton")}
               </GradientButton>
-              
+            </div>
+
+            <div className="pt-6 border-t space-y-3">
+              <h3 className="font-semibold text-destructive flex items-center gap-2">
+                <Trash2 className="w-5 h-5" />
+                Опасная зона
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Действия в этой секции необратимы. Будьте осторожны.
+              </p>
               <SoftButton
-                onClick={handleReset}
-                className="w-full text-destructive hover:text-destructive"
+                onClick={handleDeleteAllData}
+                className="w-full text-destructive hover:text-destructive border-destructive/20 hover:border-destructive/50 hover:bg-destructive/5"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                {t("settings.resetData")}
+                {t("settings.deleteAllData")}
               </SoftButton>
             </div>
           </CardContent>
