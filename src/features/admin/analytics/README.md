@@ -6,21 +6,20 @@
 ## 🎯 Реализованные метрики
 
 ### North Star Metric (Главная метрика)
-- **Что:** % пользователей, совершивших ≥2 Core Actions за 7 дней
+- **Что:** **Active Users with Valid 7-day Time Series**  
+  (валидный ряд = ≥4 дней данных `symptom_logged|bp_logged` за 7 дней + был `risk_status_viewed`)
 - **Где показывается:** Главный дашборд админки (выделенная карточка)
-- **API:** `GET /admin/analytics/overview?periodDays=7`
+- **API:** `GET /admin/analytics/risk/overview?periodDays=7`
 
-### Ключевые метрики
-1. **Activation Rate** - `activation_event / app_install`
-2. **Day 1 Retention** - % пользователей, вернувшихся на следующий день
-3. **Day 7 Retention** - % пользователей, вернувшихся через неделю  
-4. **Core Action Frequency** - среднее число Core Actions на пользователя
-5. **Repeat Users %** - % пользователей с ≥2 Core Actions
+### Дополнительные метрики (Risk Engine)
+- Coverage (avg active days with data)
+- Volatility (avg `risk_status_changed` per user)
+- Explainability coverage (% смен риска с `explainability_available=1`)
+- Action alignment 24h (% high/critical → `help_steps_opened` в течение 24ч)
 
-### Детальная аналитика
-- **Воронка пользователей** - от установки до повторного использования
-- **Анализ потерь** - ошибки по экранам и точки выхода
-- **Качественная обратная связь** - отзывы пользователей
+### Метрики по app_open
+- **First-time app_open**: сколько пользователей впервые открыли приложение (по их первому `app_open`)
+- **D7 app_open от регистрации**: сколько пользователей открыли приложение на 7-й день после `User.createdAt`
 
 ## 🗂 Структура файлов
 
@@ -37,40 +36,28 @@ web/src/pages/admin/
 
 ## 📡 Требуемые Backend API Endpoints
 
-### 1. Обзор аналитики
+### 1. Risk Engine overview (North Star и связанные метрики)
 ```typescript
-GET /admin/analytics/overview?periodDays=7
-Response: AnalyticsOverviewDto
+GET /admin/analytics/risk/overview?periodDays=7
+Response: RiskEngineOverviewResponseDto
 ```
 
-### 2. Детальные метрики
+### 2. First-time app_open
 ```typescript
-GET /admin/analytics/metrics?startDate=...&endDate=...
-Response: AnalyticsMetricsDto
+GET /admin/analytics/app-open/first-time?periodDays=7
+Response: FirstTimeAppOpenResponseDto
 ```
 
-### 3. Воронка пользователей
+### 3. D7 app_open от регистрации
 ```typescript
-GET /admin/analytics/funnel?periodDays=7
-Response: AnalyticsFunnelDto
+GET /admin/analytics/retention/app-open/d7?periodDays=7
+Response: D7AppOpenAfterRegistrationResponseDto
 ```
 
-### 4. Анализ потерь
-```typescript
-GET /admin/analytics/losses
-Response: AnalyticsLossesDto
-```
-
-### 5. События (для отладки)
+### 4. События (для отладки)
 ```typescript
 GET /admin/analytics/events?limit=100&userId=...&eventName=...
 Response: { events: AnalyticsEventDto[], total: number }
-```
-
-### 6. Обратная связь
-```typescript
-GET /admin/analytics/feedback?limit=50
-Response: { feedback: AnalyticsFeedbackDto[], total: number }
 ```
 
 ## 🏗 Backend Integration План
@@ -138,28 +125,26 @@ model FeedbackResponse {
 
 ### В AdminDashboard.tsx (главный дашборд)
 ```typescript
-import { useKeyMetrics, useNorthStarMetric } from "@/features/admin/model/useAnalytics";
+import { useRiskEngineOverview } from "@/features/admin/model/useAnalytics";
 
-const { data: keyMetrics } = useKeyMetrics();
-const { northStarMetric } = useNorthStarMetric();
+const { data: riskOverview } = useRiskEngineOverview(7);
 ```
 
 ### В AdminAnalytics.tsx (детальная страница)
 ```typescript
 import { 
-  useAnalyticsOverview,
-  useAnalyticsFunnel,
-  useAnalyticsLosses,
-  useAnalyticsFeedback 
+  useRiskEngineOverview,
+  useFirstTimeAppOpens,
+  useD7AppOpenAfterRegistration
 } from "@/features/admin/model/useAnalytics";
 ```
 
 ## 🎨 UI Особенности
 
 1. **North Star Metric** - выделенная голубая карточка на главном дашборде
-2. **Табы на детальной странице** - Воронка / Анализ потерь / Обратная связь
+2. **Детальная страница** - только метрики, которые реально собираются новой схемой
 3. **Период выбора** - 7/30/90 дней
-4. **Автообновление** - каждые 10 минут для ключевых метрик
+4. **Автообновление** - зависит от метрики (обычно 5–10 минут)
 5. **Индикаторы загрузки** - Skeleton компоненты
 
 ## 🔄 Синхронизация данных
@@ -169,9 +154,7 @@ import {
 2. **Batch sync** - при подключении к интернету
 3. **Хранение в AsyncStorage** - для офлайн работы
 
-## 📈 Метрики расчета
+## 📈 Метрики расчёта (кратко)
 
-Точные формулы согласно ТЗ:
-- **Activation Rate** = `COUNT(activation_event) / COUNT(app_install)`
-- **North Star** = `COUNT(users с ≥2 core_action за 7 дней) / COUNT(active users за 7 дней)`
-- **Retention Day N** = `COUNT(users возвратившихся на день N) / COUNT(users установивших N дней назад)`
+- **North Star (Valid series rate)** = `validSeriesUsers / activeUsersWithData`
+- **validSeriesUsers** = users с `>=4` дней данных (`symptom_logged|bp_logged`) за окно + `risk_status_viewed` в окне

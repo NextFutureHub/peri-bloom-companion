@@ -5,18 +5,14 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { Button } from "@/shared/ui/atoms/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/atoms/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/atoms/select";
 import { Badge } from "@/shared/ui/atoms/badge";
-import { Loader2, TrendingUp, TrendingDown, Users, Target, AlertTriangle, MessageSquare } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Users, Target, AlertTriangle } from "lucide-react";
 import { useTranslation } from "@/shared/hooks/useTranslation";
 import {
-  useAnalyticsOverview,
-  useKeyMetrics,
-  useAnalyticsFunnel,
-  useAnalyticsLosses,
-  useAnalyticsFeedback,
-  useNorthStarMetric,
+  useFirstTimeAppOpens,
+  useD7AppOpenAfterRegistration,
+  useRiskEngineOverview,
 } from "@/features/admin/model/useAnalytics";
 
 interface MetricCardProps {
@@ -97,59 +93,11 @@ const MetricCard: React.FC<MetricCardProps> = ({
   );
 };
 
-interface FunnelStepProps {
-  stepName: string;
-  usersCount: number;
-  conversionRate: number;
-  isLast?: boolean;
-}
-
-const FunnelStep: React.FC<FunnelStepProps> = ({ stepName, usersCount, conversionRate, isLast }) => {
-  const getStepLabel = (step: string) => {
-    switch (step) {
-      case 'app_install':
-        return 'Установка приложения';
-      case 'app_open':
-        return 'Первое открытие';
-      case 'activation_event':
-        return 'Первый Core Action';
-      case 'core_action_repeat':
-        return 'Повторное использование';
-      default:
-        return step;
-    }
-  };
-
-  return (
-    <div className="relative">
-      <div className="flex items-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border">
-        <div className="flex-1">
-          <h3 className="font-semibold text-sm">{getStepLabel(stepName)}</h3>
-          <p className="text-2xl font-bold text-blue-600">{usersCount.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">
-            {conversionRate.toFixed(1)}% от предыдущего этапа
-          </p>
-        </div>
-      </div>
-      {!isLast && (
-        <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2">
-          <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-300"></div>
-        </div>
-      )}
-    </div>
-  );
-};
+// Старые компоненты/воронки (core_action) удалены — оставляем только метрики из нового ТЗ.
 
 export default function AdminAnalytics() {
   const { t } = useTranslation();
   const [period, setPeriod] = useState<number>(7);
-
-  // Функция для получения перевода названия точки выхода
-  const getExitPointName = (point: string) => {
-    const key = `admin.analytics.exitPoints.${point}`;
-    const translated = t(key);
-    return translated !== key ? translated : point; // fallback на оригинальное название
-  };
 
   // Тестирование аналитики
   const testAnalytics = async () => {
@@ -162,11 +110,9 @@ export default function AdminAnalytics() {
     }
   };
   
-  const { data: keyMetrics, isLoading: keyMetricsLoading } = useKeyMetrics();
-  const { northStarMetric, isLoading: northStarLoading } = useNorthStarMetric(period);
-  const { data: funnel, isLoading: funnelLoading } = useAnalyticsFunnel(period);
-  const { data: losses, isLoading: lossesLoading } = useAnalyticsLosses();
-  const { data: feedbackData, isLoading: feedbackLoading } = useAnalyticsFeedback();
+  const { data: firstTimeOpens, isLoading: firstTimeOpensLoading } = useFirstTimeAppOpens(period);
+  const { data: d7FromRegistration, isLoading: d7FromRegistrationLoading } = useD7AppOpenAfterRegistration(period);
+  const { data: riskOverview, isLoading: riskOverviewLoading } = useRiskEngineOverview(period);
 
   return (
     <div className="space-y-6">
@@ -200,7 +146,7 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
-      {/* North Star Metric - главная метрика */}
+      {/* North Star Metric (новая) */}
       <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
@@ -209,15 +155,18 @@ export default function AdminAnalytics() {
             <Badge variant="outline" className="ml-2">{t('admin.analytics.northStarBadge')}</Badge>
           </CardTitle>
           <CardDescription>
-            {t('admin.analytics.northStarDescription', { period })}
+            {t('admin.analytics.validSeriesUsersDesc', {
+              rate: Math.round((riskOverview?.validSeriesRate || 0) * 100),
+              active: riskOverview?.activeUsersWithData || 0,
+            })}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {northStarLoading ? (
+          {riskOverviewLoading ? (
             <Loader2 className="h-12 w-12 animate-spin" />
           ) : (
             <div className="text-4xl font-bold text-blue-600">
-              {Math.round((northStarMetric || 0) * 100)}%
+              {Math.round((riskOverview?.validSeriesRate || 0) * 100)}%
             </div>
           )}
         </CardContent>
@@ -226,219 +175,76 @@ export default function AdminAnalytics() {
       {/* Основные метрики */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricCard
-          title={t('admin.analytics.activationRate')}
-          value={keyMetrics?.activationRate || 0}
-          format="percentage"
-          icon={TrendingUp}
-          isLoading={keyMetricsLoading}
-          description={t('admin.analytics.activationRateDesc')}
+          title={t('admin.analytics.validSeriesUsers')}
+          value={riskOverview ? riskOverview.validSeriesUsers : 0}
+          format="number"
+          icon={Target}
+          isLoading={riskOverviewLoading}
+          description={
+            riskOverview
+              ? t('admin.analytics.validSeriesUsersDesc', {
+                  rate: Math.round(riskOverview.validSeriesRate * 100),
+                  active: riskOverview.activeUsersWithData,
+                })
+              : t('admin.analytics.validSeriesUsersDesc', { rate: 0, active: 0 })
+          }
         />
         <MetricCard
-          title={t('admin.analytics.day1Retention')}
-          value={keyMetrics?.day1Retention || 0}
-          format="percentage"
-          icon={Users}
-          isLoading={keyMetricsLoading}
-          description={t('admin.analytics.day1RetentionDesc')}
-        />
-        <MetricCard
-          title={t('admin.analytics.day7Retention')}
-          value={keyMetrics?.day7Retention || 0}
-          format="percentage"
-          icon={Users}
-          isLoading={keyMetricsLoading}
-          description={t('admin.analytics.day7RetentionDesc')}
-        />
-        <MetricCard
-          title={t('admin.analytics.coreActionFreq')}
-          value={keyMetrics?.coreActionFrequency || 0}
+          title={t('admin.analytics.coverageAvgDays')}
+          value={riskOverview ? riskOverview.coverageAvgDays : 0}
           format="decimal"
           icon={Target}
-          isLoading={keyMetricsLoading}
-          description={t('admin.analytics.coreActionFreqDesc')}
+          isLoading={riskOverviewLoading}
+          description={t('admin.analytics.coverageAvgDaysDesc', { period })}
         />
         <MetricCard
-          title={t('admin.analytics.repeatUsers')}
-          value={keyMetrics?.repeatUsersPercent || 0}
+          title={t('admin.analytics.explainabilityCoverage')}
+          value={riskOverview ? riskOverview.explainabilityCoverage : 0}
           format="percentage"
           icon={TrendingUp}
-          isLoading={keyMetricsLoading}
-          description={t('admin.analytics.repeatUsersDesc')}
+          isLoading={riskOverviewLoading}
+          description={t('admin.analytics.explainabilityCoverageDesc')}
         />
         <MetricCard
-          title={t('admin.analytics.uniqueUsers')}
-          value={keyMetrics?.uniqueUsers || 0}
+          title={t('admin.analytics.volatilityAvgRiskChanges')}
+          value={riskOverview ? riskOverview.volatilityAvgRiskChanges : 0}
+          format="decimal"
+          icon={AlertTriangle}
+          isLoading={riskOverviewLoading}
+          description={t('admin.analytics.volatilityAvgRiskChangesDesc', { period })}
+        />
+        <MetricCard
+          title={t('admin.analytics.actionAlignment24h')}
+          value={riskOverview ? riskOverview.actionAlignment24h : 0}
+          format="percentage"
+          icon={Users}
+          isLoading={riskOverviewLoading}
+          description={t('admin.analytics.actionAlignment24hDesc')}
+        />
+        <MetricCard
+          title={t('admin.analytics.firstTimeAppOpen')}
+          value={firstTimeOpens?.totalUsers || 0}
           format="number"
           icon={Users}
-          isLoading={keyMetricsLoading}
-          description={t('admin.analytics.uniqueUsersDesc')}
+          isLoading={firstTimeOpensLoading}
+          description={t('admin.analytics.firstTimeAppOpenDesc', { period })}
+        />
+        <MetricCard
+          title={t('admin.analytics.d7AppOpenAfterRegistration')}
+          value={d7FromRegistration?.returnedUsers || 0}
+          format="number"
+          icon={Users}
+          isLoading={d7FromRegistrationLoading}
+          description={
+            d7FromRegistration
+              ? t('admin.analytics.d7AppOpenAfterRegistrationDesc', {
+                  eligible: d7FromRegistration.eligibleUsers,
+                  rate: Math.round((d7FromRegistration.retentionRate || 0) * 100),
+                })
+              : t('admin.analytics.d7AppOpenAfterRegistrationDesc', { eligible: 0, rate: 0 })
+          }
         />
       </div>
-
-      <Tabs defaultValue="funnel" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="funnel">{t('admin.analytics.funnel')}</TabsTrigger>
-          <TabsTrigger value="losses">{t('admin.analytics.losses')}</TabsTrigger>
-          <TabsTrigger value="feedback">{t('admin.analytics.feedback')}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="funnel" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('admin.analytics.funnelTitle')}</CardTitle>
-              <CardDescription>
-                {t('admin.analytics.funnelDescription')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {funnelLoading ? (
-                <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-              ) : funnel?.steps ? (
-                <div className="space-y-6">
-                  {funnel.steps.map((step, index) => (
-                    <FunnelStep
-                      key={step.step_name}
-                      stepName={step.step_name}
-                      usersCount={step.users_count}
-                      conversionRate={step.conversion_from_previous}
-                      isLast={index === funnel.steps.length - 1}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground">{t('admin.analytics.noFunnelData')}</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="losses" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-500" />
-                  {t('admin.analytics.errorsTitle')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {lossesLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : losses?.errorsByScreen.length ? (
-                  <div className="space-y-3">
-                    {losses.errorsByScreen.slice(0, 5).map((error, index) => (
-                      <div key={index} className="flex justify-between items-center p-2 bg-red-50 rounded">
-                        <span className="font-medium">{error.screen}</span>
-                        <div className="text-right">
-                          <div className="text-sm font-bold text-red-600">{error.errors}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {error.errorRate.toFixed(1)}% rate
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">{t('admin.analytics.noErrors')}</p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('admin.analytics.exitPointsTitle')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {lossesLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : losses?.exitPoints.length ? (
-                  <div className="space-y-3">
-                    {losses.exitPoints.map((exit, index) => (
-                      <div key={index} className="flex justify-between items-center p-2 bg-orange-50 rounded">
-                        <span className="font-medium">{getExitPointName(exit.point)}</span>
-                        <div className="text-right">
-                          <div className="text-sm font-bold text-orange-600">{exit.exits}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {exit.exitRate.toFixed(1)}% exit rate
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">{t('admin.analytics.noExitData')}</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="feedback" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-blue-500" />
-                {t('admin.analytics.feedbackTitle')}
-              </CardTitle>
-              <CardDescription>
-                {t('admin.analytics.feedbackDescription')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {feedbackLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : feedbackData?.feedback.length ? (
-                <div className="space-y-4">
-                  {feedbackData.feedback.slice(0, 10).map((feedback) => (
-                    <div key={feedback.id} className="border-l-4 border-blue-200 pl-4 py-2">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant={feedback.trigger === 'after_second_core_action' ? 'default' : 'secondary'}>
-                          {feedback.trigger === 'after_second_core_action' 
-                            ? t('admin.analytics.triggerAfterUse')
-                            : t('admin.analytics.triggerBeforeExit')
-                          }
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(feedback.created_at).toLocaleDateString('ru-RU')}
-                        </span>
-                      </div>
-                      
-                      {feedback.expectations && (
-                        <div className="mb-2">
-                          <p className="text-sm font-medium text-gray-700">{t('admin.analytics.feedbackExpectations')}</p>
-                          <p className="text-sm text-gray-600">{feedback.expectations}</p>
-                        </div>
-                      )}
-                      
-                      {feedback.unclear_points && (
-                        <div className="mb-2">
-                          <p className="text-sm font-medium text-gray-700">{t('admin.analytics.feedbackUnclear')}</p>
-                          <p className="text-sm text-gray-600">{feedback.unclear_points}</p>
-                        </div>
-                      )}
-                      
-                      {feedback.exit_reason && (
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">{t('admin.analytics.feedbackExit')}</p>
-                          <p className="text-sm text-gray-600">{feedback.exit_reason}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  
-                  {feedbackData.total > 10 && (
-                    <p className="text-sm text-muted-foreground text-center">
-                      {t('admin.analytics.feedbackShowing', { shown: 10, total: feedbackData.total })}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground">{t('admin.analytics.noFeedback')}</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 }

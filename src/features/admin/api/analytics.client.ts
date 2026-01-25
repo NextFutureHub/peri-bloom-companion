@@ -4,134 +4,55 @@
  */
 import { api } from "@/shared/api/client";
 
-export interface AnalyticsMetricsDto {
-  date: string;
-  activation_rate: number; // activation_event / app_install
-  day1_retention: number;
-  day7_retention: number;
-  core_action_frequency: number; // среднее число core_action_complete на пользователя
-  repeat_users_percent: number; // % пользователей с core_action ≥ 2 раз
-  north_star_metric: number; // % пользователей с core_action ≥ 2 раз за 7 дней
+// --- New metrics ---
+
+export interface FirstTimeAppOpenByDayDto {
+  day: string; // YYYY-MM-DD
+  users: number;
 }
 
-export interface AnalyticsFunnelStepDto {
-  step_name: 'app_install' | 'app_open' | 'activation_event' | 'core_action_repeat';
-  users_count: number;
-  conversion_from_previous: number; // %
+export interface FirstTimeAppOpenResponseDto {
+  startDate: string;
+  endDate: string;
+  totalUsers: number;
+  byDay: FirstTimeAppOpenByDayDto[];
 }
 
-export interface AnalyticsFunnelDto {
-  date: string;
-  steps: AnalyticsFunnelStepDto[];
+export interface D7AppOpenAfterRegistrationResponseDto {
+  cohortStart: string;
+  cohortEnd: string;
+  eligibleUsers: number;
+  returnedUsers: number;
+  retentionRate: number;
 }
 
-export interface AnalyticsEventDto {
-  event_name: string;
-  timestamp: string;
-  user_id: string;
-  session_id: string;
-  // Дополнительные поля в зависимости от типа события
-  [key: string]: any;
+export interface RiskEngineOverviewResponseDto {
+  startDate: string;
+  endDate: string;
+  periodDays: number;
+  activeUsersWithData: number;
+  validSeriesUsers: number;
+  validSeriesRate: number;
+  coverageAvgDays: number;
+  volatilityAvgRiskChanges: number;
+  explainabilityCoverage: number;
+  actionAlignment24h: number;
 }
 
-export interface AnalyticsFeedbackDto {
-  id: string;
-  user_id: string;
-  trigger: 'after_second_core_action' | 'exit_without_core_action';
-  expectations?: string;
-  unclear_points?: string;
-  exit_reason?: string;
-  created_at: string;
-}
-
-export interface AnalyticsLossesDto {
-  funnel: AnalyticsFunnelDto;
-  errorsByScreen: Array<{
-    screen: string;
-    errors: number;
-    errorRate: number;
-  }>;
-  exitPoints: Array<{
-    point: string;
-    exits: number;
-    exitRate: number;
-  }>;
-}
-
-export interface AnalyticsOverviewDto {
-  metrics: AnalyticsMetricsDto;
-  funnel: AnalyticsFunnelDto;
-  losses: AnalyticsLossesDto;
-  totalEvents: number;
-  uniqueUsers: number;
-  lastUpdated: string;
-}
-
-/**
- * Получить обзор аналитических метрик
- */
-export const fetchAnalyticsOverview = async (periodDays?: number): Promise<AnalyticsOverviewDto> => {
+export const fetchFirstTimeAppOpens = async (periodDays?: number): Promise<FirstTimeAppOpenResponseDto> => {
   const params = periodDays ? { periodDays } : {};
-  const response = await api.get<AnalyticsOverviewDto>("/admin/analytics/overview", { params });
+  const response = await api.get<FirstTimeAppOpenResponseDto>("/admin/analytics/app-open/first-time", { params });
   return response.data;
 };
 
-/**
- * Получить детальные метрики за период
- */
-export const fetchAnalyticsMetrics = async (
-  startDate?: string,
-  endDate?: string,
-  periodDays?: number
-): Promise<AnalyticsMetricsDto> => {
-  const params = { startDate, endDate, periodDays };
-  const response = await api.get<AnalyticsMetricsDto>("/admin/analytics/metrics", { params });
-  return response.data;
-};
-
-/**
- * Получить анализ воронки
- */
-export const fetchAnalyticsFunnel = async (periodDays?: number): Promise<AnalyticsFunnelDto> => {
+export const fetchD7AppOpenAfterRegistration = async (periodDays?: number): Promise<D7AppOpenAfterRegistrationResponseDto> => {
   const params = periodDays ? { periodDays } : {};
-  const response = await api.get<AnalyticsFunnelDto>("/admin/analytics/funnel", { params });
+  const response = await api.get<D7AppOpenAfterRegistrationResponseDto>("/admin/analytics/retention/app-open/d7", { params });
   return response.data;
 };
 
-/**
- * Получить анализ потерь пользователей
- */
-export const fetchAnalyticsLosses = async (): Promise<AnalyticsLossesDto> => {
-  const response = await api.get<AnalyticsLossesDto>("/admin/analytics/losses");
-  return response.data;
-};
-
-/**
- * Получить события за период (для отладки)
- */
-export const fetchAnalyticsEvents = async (
-  limit: number = 100,
-  userId?: string,
-  eventName?: string
-): Promise<{ events: AnalyticsEventDto[]; total: number }> => {
-  const params = { limit, userId, eventName };
-  const response = await api.get<{ events: AnalyticsEventDto[]; total: number }>(
-    "/admin/analytics/events", 
-    { params }
-  );
-  return response.data;
-};
-
-/**
- * Получить качественную обратную связь
- */
-export const fetchAnalyticsFeedback = async (
-  limit: number = 50
-): Promise<{ feedback: AnalyticsFeedbackDto[]; total: number }> => {
-  const params = { limit };
-  const response = await api.get<{ feedback: AnalyticsFeedbackDto[]; total: number }>(
-    "/admin/analytics/feedback",
-    { params }
-  );
+export const fetchRiskEngineOverview = async (periodDays?: number): Promise<RiskEngineOverviewResponseDto> => {
+  const params = periodDays ? { periodDays } : {};
+  const response = await api.get<RiskEngineOverviewResponseDto>("/admin/analytics/risk/overview", { params });
   return response.data;
 };

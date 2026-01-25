@@ -1,5 +1,5 @@
 import { useAdminDashboard } from "@/features/admin";
-import { useKeyMetrics, useNorthStarMetric } from "@/features/admin/model/useAnalytics";
+import { useRiskEngineOverview } from "@/features/admin/model/useAnalytics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/atoms/card";
 import { Users, MessageCircle, Activity, BookOpen, AlertCircle, TrendingUp, Target, Star } from "lucide-react";
 import { Skeleton } from "@/shared/ui/atoms/skeleton";
@@ -50,8 +50,7 @@ const StatCard = ({
 
 const AdminDashboard = () => {
   const { data, isLoading, error } = useAdminDashboard();
-  const { data: keyMetrics, isLoading: analyticsLoading } = useKeyMetrics();
-  const { northStarMetric, isLoading: northStarLoading } = useNorthStarMetric();
+  const { data: riskOverview, isLoading: riskLoading } = useRiskEngineOverview(7);
   const { t } = useTranslation();
 
   if (error) {
@@ -133,27 +132,37 @@ const AdminDashboard = () => {
           />
         </div>
 
-        {/* North Star Metric - главная метрика аналитики */}
+        {/* North Star Metric (новая) */}
         <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-soft">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-blue-600" />
               North Star Metric
               <Badge variant="outline" className="ml-2">Главная метрика</Badge>
+              {!riskLoading && (
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  Обновляется каждые 30 сек
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {northStarLoading ? (
+            {riskLoading ? (
               <Skeleton className="h-12 w-24" />
             ) : (
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-3xl font-bold text-blue-600">
-                    {Math.round((northStarMetric || 0) * 100)}%
+                    {Math.round(((riskOverview?.validSeriesRate || 0) * 100))}%
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Пользователи с ≥2 Core Actions за 7 дней
+                    Валидный 7‑дневный ряд (≥4 дней данных + просмотр риска)
                   </p>
+                  {(riskOverview?.validSeriesUsers || 0) === 0 && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      ⚠️ Проверьте синхронизацию событий из мобильного приложения
+                    </p>
+                  )}
                 </div>
                 <Star className="h-8 w-8 text-blue-500" />
               </div>
@@ -161,40 +170,40 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Ключевые аналитические метрики */}
+        {/* Risk Engine метрики (скользящее окно 7 дней) */}
         <div>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            Продуктовая аналитика
+            Risk Engine
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-              title="Activation Rate"
-              value={keyMetrics?.activationRate ? `${Math.round(keyMetrics.activationRate * 100)}%` : '0%'}
-              icon={TrendingUp}
-              description="Доля активировавшихся пользователей"
-              isLoading={analyticsLoading}
-            />
-            <StatCard
-              title="Day 1 Retention"
-              value={keyMetrics?.day1Retention ? `${Math.round(keyMetrics.day1Retention * 100)}%` : '0%'}
-              icon={Users}
-              description="Возвращаются на следующий день"
-              isLoading={analyticsLoading}
-            />
-            <StatCard
-              title="Day 7 Retention"
-              value={keyMetrics?.day7Retention ? `${Math.round(keyMetrics.day7Retention * 100)}%` : '0%'}
-              icon={Users}
-              description="Возвращаются через неделю"
-              isLoading={analyticsLoading}
-            />
-            <StatCard
-              title="Core Actions/User"
-              value={keyMetrics?.coreActionFrequency?.toFixed(1) || '0.0'}
+              title="Валидные ряды (users)"
+              value={riskOverview?.validSeriesUsers ?? 0}
               icon={Target}
-              description="Среднее число Core Actions"
-              isLoading={analyticsLoading}
+              description="≥4 дней данных + просмотр риска"
+              isLoading={riskLoading}
+            />
+            <StatCard
+              title="Coverage (avg days)"
+              value={riskOverview?.coverageAvgDays?.toFixed(1) ?? "0.0"}
+              icon={TrendingUp}
+              description="Среднее число дней с данными"
+              isLoading={riskLoading}
+            />
+            <StatCard
+              title="Explainability"
+              value={riskOverview ? `${Math.round(riskOverview.explainabilityCoverage * 100)}%` : "0%"}
+              icon={Users}
+              description="% смен риска с объяснением"
+              isLoading={riskLoading}
+            />
+            <StatCard
+              title="Action alignment (24h)"
+              value={riskOverview ? `${Math.round(riskOverview.actionAlignment24h * 100)}%` : "0%"}
+              icon={Users}
+              description="High/critical → help_steps_opened"
+              isLoading={riskLoading}
             />
           </div>
         </div>
