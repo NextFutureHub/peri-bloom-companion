@@ -1,73 +1,316 @@
-# Welcome to your Lovable project
+# 🌸 Peri Bloom Companion
 
-## Project info
+Веб-админ-панель для управления и аналитики мобильного приложения **Femli** — персонального помощника по мониторингу здоровья и управлению здоровьем в период менопаузы.
 
-**URL**: https://lovable.dev/projects/cec4ce54-8a59-4aec-ae09-93bdbf0b5ef8
+> **Демонстрационный сайт:** https://peribloom.vercel.app
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 📋 Содержание
 
-**Use Lovable**
+- [Описание проекта](#описание-проекта)
+- [Основные возможности](#основные-возможности)
+- [Технологический стек](#технологический-стек)
+- [Установка и запуск](#установка-и-запуск)
+- [Структура проекта](#структура-проекта)
+- [Разработка](#разработка)
+- [Развёртывание](#развёртывание)
+- [Документация аналитики](#документация-аналитики)
+- [Лицензия](#лицензия)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/cec4ce54-8a59-4aec-ae09-93bdbf0b5ef8) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📖 Описание проекта
 
-**Use your preferred IDE**
+**Peri Bloom Companion** — это веб-приложение для администраторов, которое позволяет:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- 📊 Отслеживать аналитические метрики пользователей мобильного приложения Femli
+- 👥 Управлять пользователями и их данными
+- 📈 Анализировать ключевые показатели эффективности (KPI)
+- 🎯 Мониторить главную метрику проекта (North Star Metric)
+- 📝 Работать с отзывами и интеграциями
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Проект построен с использованием современных технологий React/TypeScript и предоставляет интуитивный интерфейс для управления данными.
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## ✨ Основные возможности
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 📊 Аналитика и метрики
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **North Star Metric** — главный показатель активности пользователей с валидными данными
+- **Risk Engine метрики** — мониторинг:
+  - Coverage (среднее количество дней с данными)
+  - Volatility (среднее количество изменений статуса риска на пользователя)
+  - Explainability coverage (% изменений риска с доступным объяснением)
+  - Action alignment 24h (% пользователей, действующих на рекомендации в течение 24 часов)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 📱 Метрики активности приложения
+
+- First-time app_open — количество новых пользователей, впервые открывших приложение
+- D7 app_open retention — удержание пользователей на 7-й день после регистрации
+
+### 🎨 Интерфейс
+
+- **Адаптивный дизайн** — работает на всех устройствах
+- **Тёмная и светлая тема** — выбор по предпочтениям пользователя
+- **Быстрая загрузка** — оптимизированное клиентское приложение
+- **Интерактивные графики** — визуализация данных с помощью Recharts
+
+---
+
+## 🛠 Технологический стек
+
+### Фронтенд
+
+| Технология | Версия | Назначение |
+|:-----------|:------:|:----------|
+| **React** | 18.3.1 | Основной фреймворк для UI |
+| **TypeScript** | 5.8.3 | Типизированный JavaScript |
+| **Vite** | 5.4.19 | Сборщик и dev-сервер |
+| **React Router** | 6.30.1 | Маршрутизация |
+| **TailwindCSS** | 3.4.17 | Утилиты для стилизации |
+| **shadcn-ui** | - | Компоненты UI на базе Radix |
+| **React Hook Form** | 7.61.1 | Управление формами |
+| **Recharts** | 2.15.4 | Графики и диаграммы |
+| **Axios** | 1.13.2 | HTTP-клиент |
+| **React Query** | 5.83.0 | Управление состоянием и кеширование данных |
+| **Zod** | 3.25.76 | Валидация данных и схемы |
+| **Framer Motion** | 12.23.24 | Анимации |
+| **next-themes** | 0.3.0 | Управление темой |
+
+### Инструменты разработки
+
+- **ESLint** — статический анализ кода
+- **PostCSS + Autoprefixer** — обработка CSS
+- **Node.js & npm** — среда выполнения
+
+---
+
+## 🚀 Установка и запуск
+
+### Требования
+
+- **Node.js** версии 16+
+- **npm** или **yarn** (рекомендуется yarn 1.22.22)
+
+### Быстрый старт
+
+```bash
+# 1. Клонируйте репозиторий
+git clone https://github.com/NextFutureHub/peri-bloom-companion.git
+cd peri-bloom-companion
+
+# 2. Установите зависимости
+npm install
+# или
+yarn install
+
+# 3. Запустите dev-сервер
+npm run dev
+# или
+yarn dev
+```
+
+После этого откройте в браузере: **http://localhost:5173**
+
+---
+
+## 📁 Структура проекта
+
+```
+peri-bloom-companion/
+├── src/
+│   ├── components/           # Переиспользуемые React компоненты
+│   │   └── ui/              # Компоненты shadcn-ui
+│   │
+│   ├── features/            # Функциональные модули приложения
+│   │   └── admin/
+│   │       ├── api/         # API клиенты для запросов
+│   │       ├── model/       # React Query хуки и логика
+│   │       └── analytics/   # Интеграция аналитики
+│   │
+│   ├── pages/               # Страницы приложения
+│   ├── hooks/               # Пользовательские React хуки
+│   ├── types/               # TypeScript типы и интерфейсы
+│   ├── styles/              # Глобальные стили
+│   ├── App.tsx              # Главный компонент приложения
+│   └── main.tsx             # Точка входа приложения
+│
+├── public/                  # Статические файлы
+├── package.json             # Зависимости проекта
+├── vite.config.ts          # Конфигурация Vite
+├── tsconfig.json           # Конфигурация TypeScript
+├── eslint.config.js        # Конфигурация ESLint
+└── tailwind.config.js      # Конфигурация TailwindCSS
+```
+
+---
+
+## 👨‍💻 Разработка
+
+### Доступные команды
+
+```bash
+# Запуск dev-сервера с горячей перезагрузкой
+npm run dev
+
+# Сборка для продакшена
+npm run build
+
+# Сборка для разработки
+npm run build:dev
+
+# Проверка кода с ESLint
+npm run lint
+
+# Предпросмотр собранного приложения локально
+npm run preview
+```
+
+### Стандарты кода
+
+- Используется **ESLint** с конфигурацией для React и TypeScript
+- Код форматируется в соответствии с правилами проекта
+- Рекомендуется использовать IDE с поддержкой TypeScript (VS Code, WebStorm)
+
+### Добавление новых зависимостей
+
+```bash
+# Добавить зависимость
+npm install package-name
+
+# Добавить dev-зависимость
+npm install --save-dev package-name
+```
+
+---
+
+## 🌐 Развёртывание
+
+### Деплой на Vercel (рекомендуется)
+
+1. Создайте аккаунт на [Vercel](https://vercel.com)
+2. Импортируйте репозиторий
+3. Vercel автоматически определит конфигурацию
+4. Деплой произойдёт автоматически при push в основную ветку
+
+Текущее приложение развёрнуто на: **https://peribloom.vercel.app**
+
+### Локальная сборка для продакшена
+
+```bash
+# Создать production build
+npm run build
+
+# Локальный предпросмотр
+npm run preview
+```
+
+Собранные файлы будут в папке `dist/`
+
+---
+
+## 📊 Документация аналитики
+
+Проект интегрирует систему продуктовой аналитики из мобильного приложения Femli.
+
+### Главная метрика (North Star)
+
+**Active Users with Valid 7-day Time Series**
+
+Валидный ряд определяется как:
+- ≥4 дней данных (`symptom_logged` или `bp_logged`) за 7 дней
+- Плюс минимум один `risk_status_viewed` в этом периоде
+
+**API:** `GET /admin/analytics/risk/overview?periodDays=7`
+
+### Ключевые метрики Risk Engine
+
+| Метрика | Описание |
+|---------|---------|
+| **Coverage** | Среднее количество дней с данными на активного пользователя |
+| **Volatility** | Среднее количество изменений статуса риска на пользователя |
+| **Explainability** | % смен риска с доступным объяснением |
+| **Action Alignment 24h** | % пользователей, открывших помощь в течение 24 часов после смены высокого/критического риска |
+
+### Структура файлов аналитики
+
+```
+src/features/admin/
+├── api/
+│   └── analytics.client.ts      # API клиент для аналитических данных
+├── model/
+│   └── useAnalytics.ts          # React Query хуки
+└── analytics/
+    └── README.md                # Детальная документация
+```
+
+Полная документация по аналитике: [`src/features/admin/analytics/README.md`](src/features/admin/analytics/README.md)
+
+---
+
+## 🤝 Контрибьютинг
+
+Если вы хотите помочь в развитии проекта:
+
+1. Создайте форк репозитория
+2. Создайте ветку для вашей функции (`git checkout -b feature/AmazingFeature`)
+3. Совершите изменения и создайте коммит
+4. Запушите изменения (`git push origin feature/AmazingFeature`)
+5. Создайте Pull Request
+
+---
+
+## 🐛 Поддержка и проблемы
+
+Если вы обнаружили проблему или у вас есть предложение:
+
+1. Проверьте [существующие issues](https://github.com/NextFutureHub/peri-bloom-companion/issues)
+2. Если проблемы нет, [создайте новую issue](https://github.com/NextFutureHub/peri-bloom-companion/issues/new)
+3. Предоставьте как можно больше информации (версия Node.js, браузер, шаги воспроизведения)
+
+---
+
+## 📝 Лицензия
+
+Этот проект открыт для использования и совместной разработки.
+
+---
+
+## 📚 Полезные ссылки
+
+- 🌐 **Живой сайт:** https://peribloom.vercel.app
+- 📦 **GitHub репозиторий:** https://github.com/NextFutureHub/peri-bloom-companion
+- 🚀 **Развёрнуто на:** Vercel
+- 👥 **Автор:** NextFutureHub
+
+---
+
+## 🔄 Способы редактирования кода
+
+### 1️⃣ Локальная разработка
+
+```bash
+git clone https://github.com/NextFutureHub/peri-bloom-companion.git
+cd peri-bloom-companion
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### 2️⃣ GitHub Code Editor
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Откройте файл в репозитории
+- Нажмите кнопку ✏️ (Edit) в правом верхнем углу
+- Внесите изменения и создайте commit
 
-**Use GitHub Codespaces**
+### 3️⃣ GitHub Codespaces
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Нажмите кнопку `Code` (зелёная кнопка)
+- Выберите вкладку `Codespaces`
+- Нажмите `New codespace`
+- Редактируйте файлы прямо в облачной IDE
 
-## What technologies are used for this project?
+---
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/cec4ce54-8a59-4aec-ae09-93bdbf0b5ef8) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+**✨ Спасибо за интерес к проекту! Удачной разработки!**
